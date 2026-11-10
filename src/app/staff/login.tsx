@@ -1,10 +1,12 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { StyleSheet, TextInput } from 'react-native';
+import { View } from 'react-native';
 
-import { Button, Card, Screen } from '@/components/ui';
+import { Screen } from '@/components/screen';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Text } from '@/components/ui/text';
 import { useI18n } from '@/lib/i18n';
-import { colors } from '@/theme';
 
 export default function StaffLogin() {
   const { t } = useI18n();
@@ -12,16 +14,20 @@ export default function StaffLogin() {
   const [password, setPassword] = useState('');
   return (
     <Screen title={t('staffLogin')}>
-      <Card>
-        <TextInput style={styles.input} placeholder="Email" autoCapitalize="none" keyboardType="email-address" value={email} onChangeText={setEmail} />
-        <TextInput style={styles.input} placeholder="Password" secureTextEntry value={password} onChangeText={setPassword} />
-        {/* M2: supabase.auth.signInWithPassword */}
-        <Button label={t('staffLogin')} onPress={() => router.replace('/staff/dashboard')} />
-      </Card>
+      <View className="gap-4">
+        <View className="gap-2">
+          <Text className="text-sm font-medium">Email</Text>
+          <Input className="h-12 rounded-xl" autoCapitalize="none" keyboardType="email-address" value={email} onChangeText={setEmail} />
+        </View>
+        <View className="gap-2">
+          <Text className="text-sm font-medium">Password</Text>
+          <Input className="h-12 rounded-xl" secureTextEntry value={password} onChangeText={setPassword} />
+        </View>
+      </View>
+      {/* M2: supabase.auth.signInWithPassword */}
+      <Button size="xl" onPress={() => router.replace('/staff/dashboard')}>
+        <Text>{t('staffLogin')}</Text>
+      </Button>
     </Screen>
   );
 }
-
-const styles = StyleSheet.create({
-  input: { minHeight: 52, borderWidth: 1, borderColor: colors.border, borderRadius: 10, paddingHorizontal: 12, fontSize: 18 },
-});

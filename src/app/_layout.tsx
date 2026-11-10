@@ -1,3 +1,6 @@
+import '../global.css';
+
+import { PortalHost } from '@rn-primitives/portal';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -9,7 +12,8 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <I18nProvider>
         <StatusBar style="dark" />
-        <Stack screenOptions={{ headerShown: false }} />
+        <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: '#ffffff' } }} />
+        <PortalHost />
       </I18nProvider>
     </SafeAreaProvider>
   );
