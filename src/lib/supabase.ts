@@ -3,9 +3,10 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { Platform } from 'react-native';
 
 // Values come from .env (see .env.example). EXPO_PUBLIC_ vars are bundled into
-// the app, so only ever put the public "anon" key here, never the service key.
+// the app, so only ever put the public publishable key here.
 const url = process.env.EXPO_PUBLIC_SUPABASE_URL;
-const anonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
+// Supabase "Publishable key" (sb_publishable_...). Never the secret key.
+const anonKey = process.env.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
 
 export const isSupabaseConfigured = Boolean(url && anonKey);
 

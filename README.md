@@ -12,7 +12,7 @@ Expo (React Native) + Expo Router + TypeScript. One codebase for Android, iOS an
 ## Run locally
 ```bash
 npm install
-cp .env.example .env   # fill in Supabase URL + anon key (milestone M1)
+cp .env.example .env   # fill in Supabase URL + publishable key (milestone M1)
 npm run web            # browser
 npm run android        # Expo Go on your phone (scan the QR)
 ```
@@ -29,4 +29,4 @@ npm run android        # Expo Go on your phone (scan the QR)
 | `/display/[slug]` | Shop TV | Now serving |
 
 ## Deploy web to Vercel
-Import the repo in Vercel. `vercel.json` already sets the build command and output folder. Then add the two `EXPO_PUBLIC_SUPABASE_*` environment variables.
+Import the repo in Vercel. `vercel.json` already sets the build command and output folder. Then add the two `EXPO_PUBLIC_SUPABASE_URL` and `EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY` environment variables.
