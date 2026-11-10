@@ -16,13 +16,22 @@ select join_queue('demo', 'Aman', '9876543210');
 -- 4) What the TV screen would show (first names only):
 select get_public_queue('demo');
 
--- 5) Copy Charan's customer_token from step 2 and paste it here:
-select get_my_status('PASTE-TOKEN-HERE');
+-- 5) Charan's status. (get_my_status needs the secret customer_token, not the
+--    phone number, so this looks the token up for ticket #3.)
+select get_my_status(
+  (select customer_token from queue_entries
+   where shop_id = (select id from shops where slug = 'demo') and ticket_no = 3
+   order by joined_at desc limit 1)
+);
 -- Expect: people_ahead = 2, status = waiting
 
 -- 6) Pretend the barber called #1:
 update queue_entries set status = 'serving', called_at = now() where ticket_no = 1;
-select get_my_status('PASTE-TOKEN-HERE');
+select get_my_status(
+  (select customer_token from queue_entries
+   where shop_id = (select id from shops where slug = 'demo') and ticket_no = 3
+   order by joined_at desc limit 1)
+);
 -- Expect: people_ahead = 1, now_serving = [1]
 
 -- 7) Clean up the test customers (keeps the demo shop for the app):
