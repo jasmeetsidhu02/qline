@@ -1,56 +1,32 @@
-# Welcome to your Expo app 👋
+# QLine
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Simple digital queue for small salons and barber shops.
 
-## Get started
+- **Customers:** scan the shop's QR code, which opens `/s/<shop-slug>` in the phone browser. No app download.
+- **Staff:** install the app (Android) or use the web version to run the queue.
+- **Display:** open `/display/<shop-slug>` on a TV or tablet.
 
-1. Install dependencies
+## Stack
+Expo (React Native) + Expo Router + TypeScript. One codebase for Android, iOS and web. Backend: Supabase (Postgres, Realtime, Auth).
 
-   ```bash
-   npm install
-   ```
-
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **src/app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
+## Run locally
 ```bash
-npm run reset-project
+npm install
+cp .env.example .env   # fill in Supabase URL + anon key (milestone M1)
+npm run web            # browser
+npm run android        # Expo Go on your phone (scan the QR)
 ```
 
-This command will move the starter code to the **example** directory and create a blank **src/app** directory where you can start developing.
+## Routes
+| Path | Who | Purpose |
+|---|---|---|
+| `/` | Staff | Landing, staff login |
+| `/s/[slug]` | Customer | Join the queue |
+| `/s/[slug]/ticket` | Customer | Live position and wait |
+| `/staff/login` | Staff | Login |
+| `/staff/dashboard` | Staff | Next / Done / No-show / Add walk-in |
+| `/staff/settings` | Owner | Barbers, line mode, services, QR poster |
+| `/display/[slug]` | Shop TV | Now serving |
 
-### Other setup steps
-
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## Deploy web to Vercel
+Import the repo in Vercel. `vercel.json` already sets the build command and output folder. Then add the two `EXPO_PUBLIC_SUPABASE_*` environment variables.
