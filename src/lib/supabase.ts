@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { Platform } from 'react-native';
+import { AppState, Platform } from 'react-native';
 
 // Values come from .env (see .env.example). EXPO_PUBLIC_ vars are bundled into
 // the app, so only ever put the public publishable key here.
@@ -21,3 +21,12 @@ export const supabase: SupabaseClient | null = isSupabaseConfigured
       },
     })
   : null;
+
+// On a phone, JS timers pause when the app is in the background, so the
+// login token can expire unnoticed. Refresh it only while the app is open.
+if (supabase && Platform.OS !== 'web') {
+  AppState.addEventListener('change', (state) => {
+    if (state === 'active') supabase.auth.startAutoRefresh();
+    else supabase.auth.stopAutoRefresh();
+  });
+}
