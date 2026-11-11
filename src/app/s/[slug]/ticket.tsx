@@ -102,33 +102,34 @@ export default function TicketScreen() {
 
 function Waiting({ ticket }: { ticket: TicketStatus }) {
   const { t } = useI18n();
-  const isNext = ticket.people_ahead === 0;
-  const serving = ticket.now_serving;
+  const ahead = ticket.people_ahead;
+  const isNext = ahead === 0;
 
   return (
     <View className="gap-4">
+      {/* The one number a waiting customer cares about: how many are ahead of me. */}
       <View
         className={cn(
-          'items-center gap-1 rounded-3xl border px-6 pb-7 pt-8',
+          'items-center gap-1 rounded-3xl border px-6 pb-8 pt-8',
           isNext ? 'border-primary bg-primary/5' : 'border-border bg-card'
         )}>
-        <Text className="text-[112px] font-semibold leading-[116px] tracking-tighter text-primary">{ticket.ticket_no}</Text>
         {isNext ? (
-          <View className="items-center gap-1">
-            <Text className="text-xl font-semibold text-primary">{t('youAreNext')}</Text>
-            <Text className="text-muted-foreground">{t('youAreNextHint')}</Text>
+          <View className="items-center gap-2 py-6">
+            <Text className="text-4xl font-semibold tracking-tight text-primary">{t('youAreNext')}</Text>
+            <Text className="text-center text-muted-foreground">{t('youAreNextHint')}</Text>
           </View>
         ) : (
-          <Text className="text-lg font-medium">
-            {ticket.people_ahead === 1 ? t('aheadOne') : t('aheadMany', { n: ticket.people_ahead })}
-          </Text>
+          <>
+            <Text className="text-[112px] font-semibold leading-[116px] tracking-tighter text-primary">{ahead}</Text>
+            <Text className="text-lg font-medium">{t(ahead === 1 ? 'aheadLabelOne' : 'aheadLabelMany')}</Text>
+          </>
         )}
       </View>
 
       <View className="flex-row rounded-2xl border border-border py-4">
         <View className="flex-1 items-center gap-0.5">
-          <Text className="text-2xl font-semibold">{serving.length ? serving.map((n) => `#${n}`).join(' ') : t('nobodyYet')}</Text>
-          <Text className="text-xs text-muted-foreground">{t('nowServingNo')}</Text>
+          <Text className="text-2xl font-semibold">#{ticket.ticket_no}</Text>
+          <Text className="text-xs text-muted-foreground">{t('yourNumber')}</Text>
         </View>
         <View className="w-px bg-border" />
         <View className="flex-1 items-center gap-0.5">
