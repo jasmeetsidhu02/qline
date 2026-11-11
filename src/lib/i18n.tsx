@@ -124,6 +124,9 @@ const strings = {
     errShopClosed: 'The shop is closed right now.',
     errShopNotFound: 'Shop not found. Scan the QR code again.',
     errQueueFull: 'The line is full right now. Please ask at the counter.',
+    customerQr: 'Your shop QR code',
+    customerQrHint: 'Customers scan this with their phone camera to join the line. Tap it to open the page yourself.',
+    qrLocalhostWarning: 'This dashboard is open on "localhost", which other phones cannot reach. Open it using your computer\'s Wi-Fi address instead (for example http://192.168.1.5:8081), or use Expo Go.',
   },
   pa: {
     appName: 'QLine',
@@ -244,6 +247,9 @@ const strings = {
     errShopClosed: 'ਦੁਕਾਨ ਹੁਣ ਬੰਦ ਹੈ।',
     errShopNotFound: 'ਦੁਕਾਨ ਨਹੀਂ ਮਿਲੀ। QR ਕੋਡ ਦੁਬਾਰਾ ਸਕੈਨ ਕਰੋ।',
     errQueueFull: 'ਲਾਈਨ ਹੁਣ ਭਰੀ ਹੋਈ ਹੈ। ਕਾਊਂਟਰ ਤੇ ਪੁੱਛੋ।',
+    customerQr: 'ਤੁਹਾਡੀ ਦੁਕਾਨ ਦਾ QR ਕੋਡ',
+    customerQrHint: 'ਗਾਹਕ ਫ਼ੋਨ ਦੇ ਕੈਮਰੇ ਨਾਲ ਇਹ ਸਕੈਨ ਕਰਕੇ ਲਾਈਨ ਵਿੱਚ ਲੱਗਦੇ ਹਨ। ਆਪ ਖੋਲ੍ਹਣ ਲਈ ਇਸ ਨੂੰ ਦਬਾਓ।',
+    qrLocalhostWarning: 'ਇਹ ਡੈਸ਼ਬੋਰਡ "localhost" ਤੇ ਖੁੱਲ੍ਹਾ ਹੈ, ਜੋ ਹੋਰ ਫ਼ੋਨ ਨਹੀਂ ਖੋਲ੍ਹ ਸਕਦੇ। ਕੰਪਿਊਟਰ ਦੇ Wi-Fi ਪਤੇ ਨਾਲ ਖੋਲ੍ਹੋ (ਜਿਵੇਂ http://192.168.1.5:8081), ਜਾਂ Expo Go ਵਰਤੋ।',
   },
 } as const;
 

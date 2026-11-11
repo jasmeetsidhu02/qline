@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { ActivityIndicator, Pressable, View } from 'react-native';
 
 import { FormMessage } from '@/components/form';
+import { CustomerLinkCard } from '@/components/queue/customer-link-card';
 import { NextButton } from '@/components/queue/next-button';
 import { EmptyChair, ServingCard } from '@/components/queue/serving-card';
 import { WaitingList } from '@/components/queue/waiting-list';
@@ -153,6 +154,8 @@ export default function Dashboard() {
           <WalkInForm onAdd={addWalkIn} />
         </>
       )}
+
+      <CustomerLinkCard slug={shop.slug} />
 
       <View className="flex-row justify-center gap-2">
         <FooterLink label={t('settings')} onPress={() => router.push('/staff/settings')}>
