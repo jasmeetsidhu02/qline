@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 
-import { Field, FormMessage } from '@/components/form';
+import { Field, FormMessage, PasswordField } from '@/components/form';
 import { Screen } from '@/components/screen';
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
@@ -58,11 +58,10 @@ export default function StaffLogin() {
           keyboardType="email-address"
           textContentType="emailAddress"
         />
-        <Field
+        <PasswordField
           label={t('password')}
           value={password}
           onChangeText={setPassword}
-          secureTextEntry
           autoComplete={isSignUp ? 'new-password' : 'current-password'}
           textContentType={isSignUp ? 'newPassword' : 'password'}
           onSubmitEditing={() => canSubmit && submit()}

@@ -86,6 +86,44 @@ const strings = {
     live: 'Live',
     reconnecting: 'Reconnecting…',
     customerName: 'Customer name',
+    // M4 customer side
+    welcomeTo: 'Welcome to',
+    joinSubtitle: 'Join the line from your phone. We will show your turn live.',
+    joinHint: 'Your number is only used to tell you when your turn is near.',
+    shopNotFound: 'Shop not found',
+    shopNotFoundHint: 'Please scan the QR code in the shop again.',
+    shopClosedNow: 'The shop is not taking customers right now',
+    shopClosedNowHint: 'Please ask at the counter, or check again later.',
+    alreadyInLine: 'This phone number is already in the line as #{n}.',
+    youAreNext: "You're next!",
+    youAreNextHint: 'Please stay close to the shop.',
+    yourTurn: "It's your turn!",
+    yourTurnHint: 'Please go to the chair now.',
+    aheadOne: '1 person ahead of you',
+    aheadMany: '{n} people ahead of you',
+    aboutMin: '~{n} min',
+    lessThanMin: '< 1 min',
+    nowServingNo: 'Now serving',
+    nobodyYet: '—',
+    keepOpen: 'Keep this page open. It updates by itself.',
+    updatedAgo: 'Updated {n}s ago',
+    offline: 'No connection. Showing last update.',
+    leaveConfirm: 'Leave the line? You will lose your place.',
+    yesLeave: 'Yes, leave',
+    stay: 'Stay in line',
+    statusDone: 'Thanks for visiting!',
+    statusDoneHint: 'See you next time.',
+    statusNoShow: 'You missed your turn',
+    statusNoShowHint: 'The barber called your number but you were not here. You can join again.',
+    statusLeft: 'You left the line',
+    statusLeftHint: 'You can join again any time the shop is open.',
+    joinAgain: 'Join again',
+    ticketNotFound: 'No ticket on this phone',
+    ticketNotFoundHint: 'Join the line to get a number.',
+    shopClosedWhileWaiting: 'The shop has paused new joins. You are still in line.',
+    errShopClosed: 'The shop is closed right now.',
+    errShopNotFound: 'Shop not found. Scan the QR code again.',
+    errQueueFull: 'The line is full right now. Please ask at the counter.',
   },
   pa: {
     appName: 'QLine',
@@ -169,12 +207,54 @@ const strings = {
     live: 'ਲਾਈਵ',
     reconnecting: 'ਦੁਬਾਰਾ ਜੁੜ ਰਿਹਾ ਹੈ…',
     customerName: 'ਗਾਹਕ ਦਾ ਨਾਮ',
+    welcomeTo: 'ਜੀ ਆਇਆਂ ਨੂੰ',
+    joinSubtitle: 'ਆਪਣੇ ਫ਼ੋਨ ਤੋਂ ਲਾਈਨ ਵਿੱਚ ਲੱਗੋ। ਅਸੀਂ ਤੁਹਾਡੀ ਵਾਰੀ ਲਾਈਵ ਦਿਖਾਵਾਂਗੇ।',
+    joinHint: 'ਤੁਹਾਡਾ ਨੰਬਰ ਸਿਰਫ਼ ਵਾਰੀ ਨੇੜੇ ਆਉਣ ਤੇ ਦੱਸਣ ਲਈ ਵਰਤਿਆ ਜਾਂਦਾ ਹੈ।',
+    shopNotFound: 'ਦੁਕਾਨ ਨਹੀਂ ਮਿਲੀ',
+    shopNotFoundHint: 'ਦੁਕਾਨ ਵਿੱਚ ਲੱਗਾ QR ਕੋਡ ਦੁਬਾਰਾ ਸਕੈਨ ਕਰੋ।',
+    shopClosedNow: 'ਦੁਕਾਨ ਹੁਣ ਗਾਹਕ ਨਹੀਂ ਲੈ ਰਹੀ',
+    shopClosedNowHint: 'ਕਾਊਂਟਰ ਤੇ ਪੁੱਛੋ, ਜਾਂ ਬਾਅਦ ਵਿੱਚ ਦੇਖੋ।',
+    alreadyInLine: 'ਇਹ ਫ਼ੋਨ ਨੰਬਰ ਪਹਿਲਾਂ ਹੀ ਲਾਈਨ ਵਿੱਚ #{n} ਤੇ ਹੈ।',
+    youAreNext: 'ਅਗਲੀ ਵਾਰੀ ਤੁਹਾਡੀ!',
+    youAreNextHint: 'ਦੁਕਾਨ ਦੇ ਨੇੜੇ ਰਹੋ।',
+    yourTurn: 'ਤੁਹਾਡੀ ਵਾਰੀ ਆ ਗਈ!',
+    yourTurnHint: 'ਹੁਣੇ ਕੁਰਸੀ ਤੇ ਆਓ।',
+    aheadOne: 'ਤੁਹਾਡੇ ਤੋਂ ਅੱਗੇ 1 ਜਣਾ',
+    aheadMany: 'ਤੁਹਾਡੇ ਤੋਂ ਅੱਗੇ {n} ਜਣੇ',
+    aboutMin: '~{n} ਮਿੰਟ',
+    lessThanMin: '< 1 ਮਿੰਟ',
+    nowServingNo: 'ਹੁਣ ਵਾਰੀ',
+    nobodyYet: '—',
+    keepOpen: 'ਇਹ ਪੰਨਾ ਖੁੱਲ੍ਹਾ ਰੱਖੋ। ਇਹ ਆਪਣੇ ਆਪ ਅੱਪਡੇਟ ਹੁੰਦਾ ਹੈ।',
+    updatedAgo: '{n} ਸਕਿੰਟ ਪਹਿਲਾਂ ਅੱਪਡੇਟ',
+    offline: 'ਇੰਟਰਨੈੱਟ ਨਹੀਂ। ਆਖਰੀ ਜਾਣਕਾਰੀ ਦਿਖਾ ਰਹੇ ਹਾਂ।',
+    leaveConfirm: 'ਲਾਈਨ ਛੱਡਣੀ ਹੈ? ਤੁਹਾਡੀ ਥਾਂ ਚਲੀ ਜਾਵੇਗੀ।',
+    yesLeave: 'ਹਾਂ, ਛੱਡੋ',
+    stay: 'ਲਾਈਨ ਵਿੱਚ ਰਹੋ',
+    statusDone: 'ਆਉਣ ਲਈ ਧੰਨਵਾਦ!',
+    statusDoneHint: 'ਫਿਰ ਮਿਲਾਂਗੇ।',
+    statusNoShow: 'ਤੁਹਾਡੀ ਵਾਰੀ ਲੰਘ ਗਈ',
+    statusNoShowHint: 'ਤੁਹਾਡਾ ਨੰਬਰ ਬੁਲਾਇਆ ਗਿਆ ਪਰ ਤੁਸੀਂ ਨਹੀਂ ਸੀ। ਦੁਬਾਰਾ ਲੱਗ ਸਕਦੇ ਹੋ।',
+    statusLeft: 'ਤੁਸੀਂ ਲਾਈਨ ਛੱਡ ਦਿੱਤੀ',
+    statusLeftHint: 'ਦੁਕਾਨ ਖੁੱਲ੍ਹੀ ਹੋਵੇ ਤਾਂ ਕਦੇ ਵੀ ਦੁਬਾਰਾ ਲੱਗ ਸਕਦੇ ਹੋ।',
+    joinAgain: 'ਦੁਬਾਰਾ ਲੱਗੋ',
+    ticketNotFound: 'ਇਸ ਫ਼ੋਨ ਤੇ ਕੋਈ ਨੰਬਰ ਨਹੀਂ',
+    ticketNotFoundHint: 'ਨੰਬਰ ਲੈਣ ਲਈ ਲਾਈਨ ਵਿੱਚ ਲੱਗੋ।',
+    shopClosedWhileWaiting: 'ਦੁਕਾਨ ਨੇ ਨਵੇਂ ਗਾਹਕ ਲੈਣੇ ਰੋਕੇ ਹਨ। ਤੁਸੀਂ ਅਜੇ ਵੀ ਲਾਈਨ ਵਿੱਚ ਹੋ।',
+    errShopClosed: 'ਦੁਕਾਨ ਹੁਣ ਬੰਦ ਹੈ।',
+    errShopNotFound: 'ਦੁਕਾਨ ਨਹੀਂ ਮਿਲੀ। QR ਕੋਡ ਦੁਬਾਰਾ ਸਕੈਨ ਕਰੋ।',
+    errQueueFull: 'ਲਾਈਨ ਹੁਣ ਭਰੀ ਹੋਈ ਹੈ। ਕਾਊਂਟਰ ਤੇ ਪੁੱਛੋ।',
   },
 } as const;
 
 export type StringKey = keyof typeof strings.en;
 
-type I18nValue = { lang: Lang; t: (key: StringKey) => string; toggle: () => void };
+type I18nValue = {
+  lang: Lang;
+  /** t('aheadMany', { n: 3 }) fills in {n}. */
+  t: (key: StringKey, vars?: Record<string, string | number>) => string;
+  toggle: () => void;
+};
 
 const I18nContext = createContext<I18nValue | null>(null);
 const STORAGE_KEY = 'qline.lang';
@@ -197,7 +277,11 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     AsyncStorage.setItem(STORAGE_KEY, nextLang).catch(() => {});
   };
 
-  const t = (key: StringKey) => strings[lang][key];
+  const t = (key: StringKey, vars?: Record<string, string | number>) => {
+    let text: string = strings[lang][key];
+    if (vars) for (const [k, v] of Object.entries(vars)) text = text.replace(`{${k}}`, String(v));
+    return text;
+  };
 
   return <I18nContext.Provider value={{ lang, t, toggle }}>{children}</I18nContext.Provider>;
 }

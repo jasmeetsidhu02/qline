@@ -14,6 +14,9 @@ const CODE_TO_KEY: Record<string, StringKey> = {
   NOT_ALLOWED: 'errNotAllowed',
   ENTRY_NOT_FOUND: 'errEntryGone',
   NOT_CONFIGURED: 'errNotConfigured',
+  SHOP_CLOSED: 'errShopClosed',
+  SHOP_NOT_FOUND: 'errShopNotFound',
+  QUEUE_FULL: 'errQueueFull',
   // Supabase Auth
   invalid_credentials: 'errInvalidLogin',
   user_already_exists: 'errEmailTaken',
