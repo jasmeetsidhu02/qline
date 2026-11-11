@@ -12,9 +12,9 @@ type FieldProps = ComponentProps<typeof Input> & { label: string; hint?: ReactNo
 export function Field({ label, hint, className, ...inputProps }: FieldProps) {
   return (
     <View className="gap-2">
-      <Text className="text-sm font-medium">{label}</Text>
-      <Input className={cn('h-14 rounded-xl text-base', className)} {...inputProps} />
-      {hint ? <Text className="text-sm text-muted-foreground">{hint}</Text> : null}
+      <Text className="font-ui-md text-[14px] text-muted-foreground">{label}</Text>
+      <Input className={cn('h-[52px] rounded-xl text-[17px]', className)} {...inputProps} />
+      {hint ? <Text className="text-[13px] leading-[19px] text-muted-foreground">{hint}</Text> : null}
     </View>
   );
 }
@@ -24,10 +24,10 @@ export function PasswordField({ label, className, ...inputProps }: Omit<FieldPro
   const [visible, setVisible] = useState(false);
   return (
     <View className="gap-2">
-      <Text className="text-sm font-medium">{label}</Text>
+      <Text className="font-ui-md text-[14px] text-muted-foreground">{label}</Text>
       <View className="justify-center">
         <Input
-          className={cn('h-14 rounded-xl pr-14 text-base', className)}
+          className={cn('h-[52px] rounded-xl pr-14 text-[17px]', className)}
           secureTextEntry={!visible}
           autoCapitalize="none"
           autoCorrect={false}
@@ -49,8 +49,10 @@ export function PasswordField({ label, className, ...inputProps }: Omit<FieldPro
 export function FormMessage({ children, tone = 'error' }: { children?: ReactNode; tone?: 'error' | 'info' }) {
   if (!children) return null;
   return (
-    <View className={cn('rounded-xl px-4 py-3', tone === 'error' ? 'bg-destructive/10' : 'bg-primary/10')}>
-      <Text className={cn('text-sm', tone === 'error' ? 'text-destructive' : 'text-primary')}>{children}</Text>
+    <View className={cn('rounded-xl px-4 py-3', tone === 'error' ? 'bg-destructive/10' : 'bg-brass/10')}>
+      <Text className={cn('text-[14px] leading-[20px]', tone === 'error' ? 'text-destructive' : 'text-brass')}>
+        {children}
+      </Text>
     </View>
   );
 }

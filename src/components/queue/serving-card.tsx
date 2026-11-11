@@ -1,13 +1,12 @@
-import { Armchair, Check, UserX } from 'lucide-react-native';
+import { Armchair } from 'lucide-react-native';
 import { View } from 'react-native';
 
-import { SectionLabel } from '@/components/screen';
+import { Numeral } from '@/components/numeral';
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
-import type { QueueEntry } from '@/hooks/use-staff-queue';
 import { minutesSince } from '@/hooks/use-now';
+import type { QueueEntry } from '@/hooks/use-staff-queue';
 import { useI18n } from '@/lib/i18n';
-import { cn } from '@/lib/utils';
 
 type Props = {
   entry: QueueEntry;
@@ -18,44 +17,47 @@ type Props = {
   onNoShow: () => void;
 };
 
-// The customer currently in the chair: the most important thing on screen.
+// The customer in the chair. The one dark block on the screen, so a glance
+// from across the shop lands on it first.
 export function ServingCard({ entry, nowMs, compact, busy, onDone, onNoShow }: Props) {
   const { t } = useI18n();
   return (
-    <View className="gap-4 rounded-2xl border border-border bg-card p-5">
-      <View className="flex-row items-center justify-between">
-        <SectionLabel>{t('nowServing')}</SectionLabel>
-        <Text className="text-sm text-muted-foreground">
-          {t('inChair')} · {minutesSince(entry.called_at, nowMs)} {t('min')}
+    <View className="gap-5 rounded-[28px] bg-ink p-6">
+      <View className="flex-row items-baseline justify-between">
+        <Text className="font-ui-md text-[14px] text-brass-soft">{t('inChair')}</Text>
+        <Text className="text-[14px] text-background/50">
+          {minutesSince(entry.called_at, nowMs)} {t('min')}
         </Text>
       </View>
 
-      <View className="flex-row items-center gap-4">
-        <Text
-          className={cn(
-            'font-semibold tracking-tighter text-primary',
-            compact ? 'text-5xl leading-[48px]' : 'text-7xl leading-[72px]'
-          )}>
+      <View className="flex-row items-center gap-5">
+        <Numeral size={compact ? 'md' : 'lg'} className="text-background">
           {entry.ticket_no}
-        </Text>
-        <View className="flex-1 gap-0.5">
-          <Text className="text-xl font-semibold" numberOfLines={1}>
+        </Numeral>
+        <View className="flex-1 gap-1">
+          <Text className="font-ui-sb text-[21px] leading-[26px] text-background" numberOfLines={1}>
             {entry.name}
           </Text>
-          <Text className="text-sm text-muted-foreground" numberOfLines={1}>
+          <Text className="text-[14px] text-background/50" numberOfLines={1}>
             {entry.phone ?? t('walkIn')}
           </Text>
         </View>
       </View>
 
       <View className="flex-row gap-3">
-        <Button variant="outline" size="lg" className="h-12 flex-1 rounded-xl" disabled={busy} onPress={onDone}>
-          <Check size={18} color="#0f766e" />
-          <Text className="font-semibold">{t('done')}</Text>
+        <Button
+          size="lg"
+          className="flex-1 rounded-xl border border-ink-line bg-transparent active:bg-white/10"
+          disabled={busy}
+          onPress={onDone}>
+          <Text className="font-ui-sb text-background">{t('done')}</Text>
         </Button>
-        <Button variant="outline" size="lg" className="h-12 flex-1 rounded-xl" disabled={busy} onPress={onNoShow}>
-          <UserX size={18} color="#71717a" />
-          <Text className="font-semibold text-muted-foreground">{t('noShow')}</Text>
+        <Button
+          size="lg"
+          className="flex-1 rounded-xl border border-ink-line bg-transparent active:bg-white/10"
+          disabled={busy}
+          onPress={onNoShow}>
+          <Text className="font-ui-md text-background/60">{t('noShow')}</Text>
         </Button>
       </View>
     </View>
@@ -65,13 +67,13 @@ export function ServingCard({ entry, nowMs, compact, busy, onDone, onNoShow }: P
 export function EmptyChair() {
   const { t } = useI18n();
   return (
-    <View className="flex-row items-center gap-4 rounded-2xl border border-dashed border-border p-5">
+    <View className="flex-row items-center gap-4 rounded-[28px] bg-card px-6 py-7">
       <View className="h-12 w-12 items-center justify-center rounded-full bg-secondary">
-        <Armchair size={22} color="#71717a" />
+        <Armchair size={22} color="#5E6761" />
       </View>
-      <View className="flex-1 gap-0.5">
-        <Text className="font-semibold">{t('chairFree')}</Text>
-        <Text className="text-sm text-muted-foreground">{t('chairFreeHint')}</Text>
+      <View className="flex-1 gap-1">
+        <Text className="font-ui-sb text-[17px]">{t('chairFree')}</Text>
+        <Text className="text-[14px] leading-[20px] text-muted-foreground">{t('chairFreeHint')}</Text>
       </View>
     </View>
   );

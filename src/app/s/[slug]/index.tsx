@@ -1,10 +1,10 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import { Clock, MapPinOff, Scissors } from 'lucide-react-native';
+import { Clock, MapPinOff } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 
 import { Field, FormMessage } from '@/components/form';
-import { Screen } from '@/components/screen';
+import { LanguageSwitch } from '@/components/screen';
 import { StatusBlock } from '@/components/status-block';
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
@@ -12,10 +12,12 @@ import { errorKey } from '@/lib/errors';
 import { StringKey, useI18n } from '@/lib/i18n';
 import { supabase } from '@/lib/supabase';
 import { loadTicket, saveTicket } from '@/lib/ticket-storage';
+import { ScrollView } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 type ShopInfo = { id: string; name: string; is_open: boolean };
 
-// Customer join page. The shop's QR code points here: https://<domain>/s/<shop-slug>
+// What the QR code opens: https://<domain>/s/<shop-slug>
 export default function JoinQueue() {
   const { slug } = useLocalSearchParams<{ slug: string }>();
   const { t } = useI18n();
@@ -31,7 +33,7 @@ export default function JoinQueue() {
     const client = supabase;
     let alive = true;
     (async () => {
-      // 1) Already holding a live ticket for this shop? Go straight to it.
+      // Already holding a live ticket here? Go straight to it.
       const token = await loadTicket(slug);
       if (token) {
         const { data } = await client.rpc('get_my_status', { p_token: token });
@@ -40,8 +42,7 @@ export default function JoinQueue() {
           return;
         }
       }
-      // 2) Load the shop's public info. RLS policy "shops_read_all" allows this
-      //    for anyone, and the shops table holds nothing private.
+      // Public shop info. The shops table holds nothing private.
       const { data } = await client.from('shops').select('id, name, is_open').eq('slug', slug).maybeSingle();
       if (!alive) return;
       if (!data) setState('notFound');
@@ -63,7 +64,6 @@ export default function JoinQueue() {
     setError(null);
     const { data, error } = await supabase.rpc('join_queue', { p_slug: slug, p_name: name.trim(), p_phone: phone });
     if (error) {
-      // 'ALREADY_IN_QUEUE:7' → tell them their number.
       const already = error.message?.match(/^ALREADY_IN_QUEUE:(\d+)/);
       setError(already ? t('alreadyInLine', { n: already[1] }) : t(errorKey(error) as StringKey));
       if (error.message?.startsWith('SHOP_CLOSED')) setShop((s) => (s ? { ...s, is_open: false } : s));
@@ -74,62 +74,57 @@ export default function JoinQueue() {
     router.replace(`/s/${slug}/ticket`);
   }
 
-  if (state === 'loading') {
-    return (
-      <Screen>
-        <View className="items-center py-24">
-          <ActivityIndicator />
-        </View>
-      </Screen>
-    );
-  }
-
-  if (state === 'notFound' || !shop) {
-    return (
-      <Screen>
-        <StatusBlock icon={<MapPinOff size={26} color="#71717a" />} title={t('shopNotFound')} hint={t('shopNotFoundHint')} />
-      </Screen>
-    );
-  }
-
   return (
-    <Screen>
-      <View className="gap-4 pt-4">
-        <View className="h-14 w-14 items-center justify-center rounded-2xl bg-primary">
-          <Scissors size={26} color="#ffffff" />
+    <SafeAreaView className="flex-1 bg-background">
+      <ScrollView
+        contentContainerClassName="w-full max-w-md self-center px-5 pb-14 pt-3 gap-7"
+        keyboardShouldPersistTaps="handled">
+        <View className="flex-row items-start justify-between gap-4">
+          <Text className="font-num-b text-[19px] tracking-[-0.3px] text-muted-foreground">QLine</Text>
+          <LanguageSwitch />
         </View>
-        <View className="gap-1">
-          <Text className="text-sm font-medium uppercase tracking-wider text-muted-foreground">{t('welcomeTo')}</Text>
-          <Text className="text-3xl font-semibold tracking-tight">{shop.name}</Text>
-        </View>
-        <Text className="text-base text-muted-foreground">{t('joinSubtitle')}</Text>
-      </View>
 
-      {!shop.is_open ? (
-        <StatusBlock icon={<Clock size={26} color="#71717a" />} title={t('shopClosedNow')} hint={t('shopClosedNowHint')} />
-      ) : (
-        <>
-          <View className="gap-4">
-            <Field label={t('yourName')} value={name} onChangeText={setName} autoComplete="name" maxLength={40} />
-            <Field
-              label={t('phone')}
-              value={phone}
-              onChangeText={(v) => setPhone(v.replace(/\D/g, '').slice(0, 10))}
-              keyboardType="phone-pad"
-              autoComplete="tel"
-              placeholder="98765 43210"
-              hint={t('joinHint')}
-              onSubmitEditing={() => canJoin && join()}
-            />
+        {state === 'loading' ? (
+          <View className="items-center py-24">
+            <ActivityIndicator />
           </View>
+        ) : state === 'notFound' || !shop ? (
+          <StatusBlock icon={<MapPinOff size={26} color="#5E6761" />} title={t('shopNotFound')} hint={t('shopNotFoundHint')} />
+        ) : (
+          <>
+            <View className="gap-3">
+              <Text className="font-ui-sb text-[34px] leading-[40px] tracking-[-0.8px]">{shop.name}</Text>
+              <Text className="max-w-[310px] text-[16px] leading-[24px] text-muted-foreground">{t('joinSubtitle')}</Text>
+            </View>
 
-          <FormMessage>{error}</FormMessage>
+            {!shop.is_open ? (
+              <StatusBlock icon={<Clock size={26} color="#5E6761" />} title={t('shopClosedNow')} hint={t('shopClosedNowHint')} />
+            ) : (
+              <>
+                <View className="gap-4">
+                  <Field label={t('yourName')} value={name} onChangeText={setName} autoComplete="name" maxLength={40} />
+                  <Field
+                    label={t('phone')}
+                    value={phone}
+                    onChangeText={(v) => setPhone(v.replace(/\D/g, '').slice(0, 10))}
+                    keyboardType="phone-pad"
+                    autoComplete="tel"
+                    placeholder="98765 43210"
+                    hint={t('joinHint')}
+                    onSubmitEditing={() => canJoin && join()}
+                  />
+                </View>
 
-          <Button size="xl" disabled={!canJoin} onPress={join}>
-            {busy ? <ActivityIndicator color="#ffffff" /> : <Text>{t('joinQueue')}</Text>}
-          </Button>
-        </>
-      )}
-    </Screen>
+                <FormMessage>{error}</FormMessage>
+
+                <Button size="xl" disabled={!canJoin} onPress={join}>
+                  {busy ? <ActivityIndicator color="#EFF1EE" /> : <Text>{t('joinQueue')}</Text>}
+                </Button>
+              </>
+            )}
+          </>
+        )}
+      </ScrollView>
+    </SafeAreaView>
   );
 }

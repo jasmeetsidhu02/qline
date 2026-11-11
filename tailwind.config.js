@@ -20,6 +20,18 @@ module.exports = {
         accent: { DEFAULT: 'hsl(var(--accent))', foreground: 'hsl(var(--accent-foreground))' },
         popover: { DEFAULT: 'hsl(var(--popover))', foreground: 'hsl(var(--popover-foreground))' },
         card: { DEFAULT: 'hsl(var(--card))', foreground: 'hsl(var(--card-foreground))' },
+        // QLine's own names
+        ink: { DEFAULT: 'hsl(var(--ink))', soft: 'hsl(var(--ink-soft))', line: 'hsl(var(--ink-line))' },
+        brass: { DEFAULT: 'hsl(var(--brass))', soft: 'hsl(var(--brass-soft))' },
+      },
+      // One family per weight: React Native does not pick a weight from a
+      // family the way a browser does, so each weight is its own font file.
+      fontFamily: {
+        ui: ['SchibstedGrotesk_400Regular', 'system-ui', 'sans-serif'],
+        'ui-md': ['SchibstedGrotesk_500Medium', 'system-ui', 'sans-serif'],
+        'ui-sb': ['SchibstedGrotesk_600SemiBold', 'system-ui', 'sans-serif'],
+        num: ['Fraunces_600SemiBold', 'Georgia', 'serif'],
+        'num-b': ['Fraunces_700Bold', 'Georgia', 'serif'],
       },
       borderRadius: {
         lg: 'var(--radius)',

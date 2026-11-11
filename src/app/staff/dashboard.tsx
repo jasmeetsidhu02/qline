@@ -1,5 +1,4 @@
 import { router } from 'expo-router';
-import { LogOut, Settings } from 'lucide-react-native';
 import { useState } from 'react';
 import { ActivityIndicator, Pressable, View } from 'react-native';
 
@@ -9,8 +8,7 @@ import { NextButton } from '@/components/queue/next-button';
 import { EmptyChair, ServingCard } from '@/components/queue/serving-card';
 import { WaitingList } from '@/components/queue/waiting-list';
 import { WalkInForm } from '@/components/queue/walk-in-form';
-import { Screen, SectionLabel } from '@/components/screen';
-import { Button } from '@/components/ui/button';
+import { Screen, SectionHeading } from '@/components/screen';
 import { Text } from '@/components/ui/text';
 import { useNow } from '@/hooks/use-now';
 import { useStaffQueue } from '@/hooks/use-staff-queue';
@@ -20,9 +18,8 @@ import { StringKey, useI18n } from '@/lib/i18n';
 import { supabase } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
 
-const ICON = '#18181b';
-
-// The barber's main screen: who is in the chair, who is next, one big button.
+// The barber's screen. One dark block for who is in the chair, one brass
+// button to call the next person, and the line underneath.
 export default function Dashboard() {
   const { t } = useI18n();
   const { shop, refreshShop, signOut } = useAuth();
@@ -49,8 +46,7 @@ export default function Dashboard() {
     if (!supabase || !shop) return;
     setToggling(true);
     setActionError(null);
-    // A normal table update. RLS policy "shops_members_update" only lets
-    // members of this shop do it, so nobody else can close your shop.
+    // RLS policy "shops_members_update" means only this shop's staff can do it.
     const { error } = await supabase.from('shops').update({ is_open: !shop.is_open }).eq('id', shop.id);
     if (error) setActionError(errorKey(error));
     else await refreshShop();
@@ -62,40 +58,31 @@ export default function Dashboard() {
   const shownError = actionError ?? (loadError && !queue ? errorKey(loadError) : null);
 
   return (
-    <Screen title={shop.name} subtitle={`/s/${shop.slug}`}>
-      {/* Open / closed */}
-      <View className="flex-row items-center justify-between gap-4 rounded-2xl bg-secondary px-4 py-3">
-        <View className="flex-1 flex-row items-center gap-2.5">
-          <View className={cn('h-2.5 w-2.5 rounded-full', shop.is_open ? 'bg-primary' : 'bg-muted-foreground/40')} />
-          <View className="flex-1">
-            <Text className="font-semibold">{t(shop.is_open ? 'shopOpen' : 'shopClosed')}</Text>
-            <Text className="text-sm text-muted-foreground">
-              {t(shop.is_open ? 'customersCanJoin' : 'customersCannotJoin')}
-            </Text>
-          </View>
-        </View>
-        <Button
-          variant={shop.is_open ? 'outline' : 'default'}
-          className="rounded-lg"
-          onPress={toggleOpen}
-          disabled={toggling}>
-          {toggling ? (
-            <ActivityIndicator color={shop.is_open ? ICON : '#ffffff'} />
-          ) : (
-            <Text>{t(shop.is_open ? 'closeShop' : 'openShop')}</Text>
-          )}
-        </Button>
-      </View>
+    <Screen title={shop.name}>
+      {/* Open or closed, and the switch for it */}
+      <Pressable
+        role="button"
+        accessibilityLabel={t(shop.is_open ? 'closeShop' : 'openShop')}
+        onPress={toggleOpen}
+        disabled={toggling}
+        className="-mt-3 flex-row items-center gap-3 active:opacity-60">
+        <View className={cn('h-2 w-2 rounded-full', shop.is_open ? 'bg-brass' : 'bg-muted-foreground/40')} />
+        <Text className="font-ui-md text-[15px]">{t(shop.is_open ? 'shopOpen' : 'shopClosed')}</Text>
+        {toggling ? (
+          <ActivityIndicator size="small" />
+        ) : (
+          <Text className="text-[15px] text-muted-foreground underline">
+            {t(shop.is_open ? 'closeShop' : 'openShop')}
+          </Text>
+        )}
+      </Pressable>
 
       <FormMessage>{shownError ? t(shownError) : null}</FormMessage>
 
       {!queue ? (
-        <View className="items-center py-16">
-          {loadError ? null : <ActivityIndicator />}
-        </View>
+        <View className="items-center py-20">{loadError ? null : <ActivityIndicator />}</View>
       ) : (
         <>
-          {/* In the chair */}
           <View className="gap-3">
             {serving.length === 0 ? (
               <EmptyChair />
@@ -121,26 +108,20 @@ export default function Dashboard() {
             onPress={() => run(() => callNext())}
           />
 
-          {/* Today at a glance */}
-          <View className="flex-row rounded-2xl border border-border py-4">
-            <Stat value={waiting.length} label={t('waitingList')} />
-            <View className="w-px bg-border" />
-            <Stat value={queue.done_today} label={t('doneToday')} />
-            <View className="w-px bg-border" />
-            <Stat value={queue.no_show_today} label={t('noShows')} />
-          </View>
-
-          {/* The line */}
           <View className="gap-3">
-            <View className="flex-row items-center justify-between">
-              <SectionLabel>
-                {t('waitingList')} · {waiting.length}
-              </SectionLabel>
-              <View className="flex-row items-center gap-1.5">
-                <View className={cn('h-1.5 w-1.5 rounded-full', live ? 'bg-primary' : 'bg-amber-500')} />
-                <Text className="text-xs text-muted-foreground">{t(live ? 'live' : 'reconnecting')}</Text>
-              </View>
-            </View>
+            <SectionHeading
+              note={
+                waiting.length || !live ? (
+                  <View className="flex-row items-center gap-2">
+                    {!live ? <View className="h-1.5 w-1.5 rounded-full bg-brass" /> : null}
+                    <Text className="text-[13px] text-muted-foreground">
+                      {waiting.length ? t('waitingCount', { n: waiting.length }) : t('reconnecting')}
+                    </Text>
+                  </View>
+                ) : undefined
+              }>
+              {t('waitingList')}
+            </SectionHeading>
             <WaitingList
               entries={waiting}
               nowMs={nowMs}
@@ -149,43 +130,29 @@ export default function Dashboard() {
               onCall={(id) => run(() => callNext(id))}
               onNoShow={(id) => run(() => finish(id, 'no_show'))}
             />
+            <WalkInForm onAdd={addWalkIn} />
           </View>
 
-          <WalkInForm onAdd={addWalkIn} />
+          <CustomerLinkCard slug={shop.slug} shopName={shop.name} />
+
+          <Text className="text-center text-[14px] text-muted-foreground">
+            {t('todaySummary', { done: queue.done_today, noShow: queue.no_show_today })}
+          </Text>
         </>
       )}
 
-      <CustomerLinkCard slug={shop.slug} />
-
-      <View className="flex-row justify-center gap-2">
-        <FooterLink label={t('settings')} onPress={() => router.push('/staff/settings')}>
-          <Settings size={16} color="#71717a" />
-        </FooterLink>
-        <FooterLink label={t('signOut')} onPress={signOut}>
-          <LogOut size={16} color="#71717a" />
-        </FooterLink>
+      <View className="flex-row justify-center gap-6">
+        <FooterLink label={t('settings')} onPress={() => router.push('/staff/settings')} />
+        <FooterLink label={t('signOut')} onPress={signOut} />
       </View>
     </Screen>
   );
 }
 
-function Stat({ value, label }: { value: number; label: string }) {
+function FooterLink({ label, onPress }: { label: string; onPress: () => void }) {
   return (
-    <View className="flex-1 items-center gap-0.5">
-      <Text className="text-2xl font-semibold">{value}</Text>
-      <Text className="text-xs text-muted-foreground">{label}</Text>
-    </View>
-  );
-}
-
-function FooterLink({ label, onPress, children }: { label: string; onPress: () => void; children: React.ReactNode }) {
-  return (
-    <Pressable
-      role="button"
-      onPress={onPress}
-      className="flex-row items-center gap-2 rounded-lg px-3 py-2.5 active:bg-accent">
-      {children}
-      <Text className="text-sm text-muted-foreground">{label}</Text>
+    <Pressable role="button" onPress={onPress} hitSlop={10} className="py-2 active:opacity-60">
+      <Text className="text-[15px] text-muted-foreground underline">{label}</Text>
     </Pressable>
   );
 }

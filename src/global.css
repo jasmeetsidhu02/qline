@@ -2,29 +2,47 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Design tokens (shadcn "neutral" palette with a calm teal accent).
-   Change colours here and the whole app follows. Values are HSL. */
+/* QLine palette.
+   ink    — a green-black, like a painted shop door; used for hero blocks
+            and primary buttons
+   paper  — limewash green-grey page background
+   brass  — the one warm accent: scissors, shop signage. Marks the moment
+            it is the customer's turn, and nothing else. */
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 240 10% 3.9%;
+    --background: 140 8% 94%;
+    --foreground: 152 20% 11%;
+
+    --ink: 152 20% 11%;
+    --ink-soft: 152 16% 17%;
+    --ink-line: 152 12% 26%;
+    --brass: 36 59% 35%;
+    --brass-soft: 36 45% 62%;
+
     --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
+    --card-foreground: 152 20% 11%;
     --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
-    --primary: 173 80% 26%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 240 4.8% 95.9%;
-    --secondary-foreground: 240 5.9% 10%;
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
-    --accent: 240 4.8% 95.9%;
-    --accent-foreground: 240 5.9% 10%;
-    --destructive: 0 72% 51%;
+    --popover-foreground: 152 20% 11%;
+
+    --primary: 152 20% 11%;
+    --primary-foreground: 140 8% 96%;
+
+    --secondary: 140 8% 90%;
+    --secondary-foreground: 152 20% 11%;
+
+    --muted: 140 8% 90%;
+    --muted-foreground: 150 7% 40%;
+
+    --accent: 140 8% 88%;
+    --accent-foreground: 152 20% 11%;
+
+    --destructive: 8 55% 36%;
     --destructive-foreground: 0 0% 100%;
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 173 80% 26%;
-    --radius: 0.75rem;
+
+    --border: 140 8% 85%;
+    --input: 140 8% 82%;
+    --ring: 36 59% 35%;
+
+    --radius: 0.875rem;
   }
 }

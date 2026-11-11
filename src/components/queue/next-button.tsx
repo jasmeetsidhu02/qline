@@ -1,6 +1,6 @@
-import { ArrowRight } from 'lucide-react-native';
 import { ActivityIndicator, Pressable, View } from 'react-native';
 
+import { Numeral } from '@/components/numeral';
 import { Text } from '@/components/ui/text';
 import type { QueueEntry } from '@/hooks/use-staff-queue';
 import { useI18n } from '@/lib/i18n';
@@ -13,37 +13,37 @@ type Props = {
   onPress: () => void;
 };
 
-// The one big button. Tall on purpose: it gets tapped with busy hands.
+// Brass means "being called" everywhere in QLine: this button on the
+// barber's phone, and the customer's screen when their turn arrives.
 export function NextButton({ nextEntry, hasServing, busy, onPress }: Props) {
   const { t } = useI18n();
   const nothingToDo = !nextEntry && !hasServing;
-  const disabled = busy || nothingToDo;
-
-  const hint = nextEntry
-    ? `${t('nextUp')} · #${nextEntry.ticket_no} ${nextEntry.name}`
-    : hasServing
-      ? t('finishCurrent')
-      : t('noOneWaiting');
 
   return (
     <Pressable
       role="button"
       accessibilityLabel={t('next')}
-      disabled={disabled}
+      disabled={busy || nothingToDo}
       onPress={onPress}
       className={cn(
-        'h-24 flex-row items-center justify-between rounded-2xl bg-primary px-6 active:opacity-90',
-        nothingToDo && 'opacity-40'
+        'h-[88px] flex-row items-center justify-between rounded-2xl bg-brass px-6 active:opacity-90',
+        nothingToDo && 'bg-secondary'
       )}>
       <View className="flex-1 gap-0.5">
-        <Text className="text-3xl font-semibold leading-9 text-primary-foreground">{t('next')}</Text>
-        <Text className="text-sm text-primary-foreground/75" numberOfLines={1}>
-          {hint}
+        <Text className={cn('font-ui-sb text-[26px] leading-[30px]', nothingToDo ? 'text-muted-foreground' : 'text-background')}>
+          {t('next')}
+        </Text>
+        <Text className={cn('text-[14px]', nothingToDo ? 'text-muted-foreground' : 'text-background/70')} numberOfLines={1}>
+          {nextEntry ? nextEntry.name : hasServing ? t('finishCurrent') : t('noOneWaiting')}
         </Text>
       </View>
-      <View className="h-12 w-12 items-center justify-center rounded-full bg-white/15">
-        {busy ? <ActivityIndicator color="#ffffff" /> : <ArrowRight size={24} color="#ffffff" />}
-      </View>
+      {busy ? (
+        <ActivityIndicator color="#EFF1EE" />
+      ) : nextEntry ? (
+        <Numeral size="md" className="text-background/90">
+          {nextEntry.ticket_no}
+        </Numeral>
+      ) : null}
     </Pressable>
   );
 }

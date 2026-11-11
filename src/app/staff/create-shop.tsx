@@ -5,6 +5,7 @@ import { Field, FormMessage } from '@/components/form';
 import { Screen } from '@/components/screen';
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
+import { prettyBaseUrl } from '@/lib/app-url';
 import { useAuth } from '@/lib/auth';
 import { errorKey } from '@/lib/errors';
 import { StringKey, useI18n } from '@/lib/i18n';
@@ -72,7 +73,7 @@ export default function CreateShop() {
           }}
           hint={
             <>
-              qline…/s/<Text className="font-semibold text-foreground">{slug || '…'}</Text>
+              {prettyBaseUrl()}/s/<Text className="font-ui-sb text-foreground">{slug || '…'}</Text>
               {'\n'}
               {t('shopLinkHint')}
             </>

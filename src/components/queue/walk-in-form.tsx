@@ -1,6 +1,6 @@
-import { UserPlus } from 'lucide-react-native';
+import { Plus } from 'lucide-react-native';
 import { useState } from 'react';
-import { ActivityIndicator, View } from 'react-native';
+import { ActivityIndicator, Pressable, View } from 'react-native';
 
 import { Field, FormMessage } from '@/components/form';
 import { Button } from '@/components/ui/button';
@@ -12,8 +12,8 @@ type Props = {
   onAdd: (name: string, phone: string) => Promise<{ code?: string; message?: string } | null>;
 };
 
-// Collapsed: one button. Expanded: name + optional phone, right in the page
-// (no popup, so it behaves the same on every phone and in the browser).
+// For customers who walk in without scanning. Opens in place rather than in
+// a popup, so it behaves the same on every phone and in the browser.
 export function WalkInForm({ onAdd }: Props) {
   const { t } = useI18n();
   const [open, setOpen] = useState(false);
@@ -43,16 +43,19 @@ export function WalkInForm({ onAdd }: Props) {
 
   if (!open) {
     return (
-      <Button variant="secondary" size="xl" onPress={() => setOpen(true)}>
-        <UserPlus size={18} color="#18181b" />
-        <Text>{t('addWalkIn')}</Text>
-      </Button>
+      <Pressable
+        role="button"
+        onPress={() => setOpen(true)}
+        className="flex-row items-center gap-3 rounded-2xl border border-dashed border-input px-5 py-4 active:bg-accent">
+        <Plus size={18} color="#5E6761" />
+        <Text className="font-ui-md text-[16px] text-muted-foreground">{t('addSomeone')}</Text>
+      </Pressable>
     );
   }
 
   return (
-    <View className="gap-4 rounded-2xl border border-border bg-card p-5">
-      <Text className="text-lg font-semibold">{t('addWalkIn')}</Text>
+    <View className="gap-4 rounded-2xl bg-card p-5">
+      <Text className="font-ui-sb text-[17px]">{t('addSomeone')}</Text>
       <Field label={t('customerName')} value={name} onChangeText={setName} autoFocus />
       <Field
         label={t('phoneOptional')}
@@ -63,11 +66,11 @@ export function WalkInForm({ onAdd }: Props) {
       />
       <FormMessage>{error ? t(error) : null}</FormMessage>
       <View className="flex-row gap-3">
-        <Button variant="outline" size="xl" className="flex-1" onPress={close} disabled={busy}>
+        <Button variant="outline" size="lg" className="flex-1 rounded-xl" onPress={close} disabled={busy}>
           <Text>{t('cancel')}</Text>
         </Button>
-        <Button size="xl" className="flex-1" onPress={submit} disabled={!canAdd}>
-          {busy ? <ActivityIndicator color="#ffffff" /> : <Text>{t('addToQueue')}</Text>}
+        <Button size="lg" className="flex-1 rounded-xl" onPress={submit} disabled={!canAdd}>
+          {busy ? <ActivityIndicator color="#EFF1EE" /> : <Text>{t('addToQueue')}</Text>}
         </Button>
       </View>
     </View>
