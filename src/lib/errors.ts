@@ -9,6 +9,11 @@ const CODE_TO_KEY: Record<string, StringKey> = {
   INVALID_SLUG: 'errInvalidSlug',
   INVALID_NAME: 'errInvalidName',
   NOT_LOGGED_IN: 'errInvalidLogin',
+  INVALID_PHONE: 'errInvalidPhone',
+  ALREADY_IN_QUEUE: 'errAlreadyInQueue',
+  NOT_ALLOWED: 'errNotAllowed',
+  ENTRY_NOT_FOUND: 'errEntryGone',
+  NOT_CONFIGURED: 'errNotConfigured',
   // Supabase Auth
   invalid_credentials: 'errInvalidLogin',
   user_already_exists: 'errEmailTaken',
