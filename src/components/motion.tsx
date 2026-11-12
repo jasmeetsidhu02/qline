@@ -1,5 +1,5 @@
 import { ReactNode, useEffect, useRef } from "react";
-import { Animated, Easing, Platform } from "react-native";
+import { Animated, Easing, Platform, View } from "react-native";
 import ReanimatedView, {
   LinearTransition,
   useReducedMotion,
@@ -60,18 +60,29 @@ function useEntrance(delay: number, reduced: boolean) {
 export function Page({
   children,
   className,
+  grow,
 }: {
   children: ReactNode;
   className?: string;
+  /** Set when this sits inside a scroll view rather than filling the screen. */
+  grow?: boolean;
 }) {
   const reduced = useReducedMotion();
   const progress = useEntrance(0, reduced);
+  // The styling classes go on a plain View inside. React Native's own
+  // Animated.View is not one of the components NativeWind wraps, so a
+  // className handed to it is quietly dropped — which is how the sign-in
+  // screen lost its two-column layout on wide windows and fell back to the
+  // phone one.
   return (
     <Animated.View
-      className={className ?? "flex-1"}
-      style={{ opacity: progress }}
+      style={
+        grow
+          ? { flexGrow: 1, width: "100%", opacity: progress }
+          : { flex: 1, opacity: progress }
+      }
     >
-      {children}
+      <View className={className ?? "flex-1"}>{children}</View>
     </Animated.View>
   );
 }
@@ -90,7 +101,6 @@ export function Appear({
   const progress = useEntrance(delay, reduced);
   return (
     <Animated.View
-      className={className}
       style={{
         opacity: progress,
         transform: [
@@ -103,7 +113,7 @@ export function Appear({
         ],
       }}
     >
-      {children}
+      <View className={className}>{children}</View>
     </Animated.View>
   );
 }
@@ -119,8 +129,8 @@ export function AppearInPlace({
   const reduced = useReducedMotion();
   const progress = useEntrance(0, reduced);
   return (
-    <Animated.View className={className} style={{ opacity: progress }}>
-      {children}
+    <Animated.View style={{ opacity: progress }}>
+      <View className={className}>{children}</View>
     </Animated.View>
   );
 }

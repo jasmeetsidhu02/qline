@@ -38,7 +38,7 @@ export function ShopHeader({
 /** The card that lifts over the plate and holds the page's real content. */
 export function ShopSheet({ children }: { children: ReactNode }) {
   return (
-    <View className="-mt-5 flex-1 rounded-t-[32px] bg-background px-6 pb-14 pt-8">
+    <View className="-mt-5 min-h-[60vh] flex-grow rounded-t-[32px] bg-background px-6 pb-14 pt-8">
       <View className="w-full max-w-md gap-7 self-center">{children}</View>
     </View>
   );

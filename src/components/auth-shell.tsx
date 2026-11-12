@@ -22,7 +22,9 @@ export function AuthShell({
   sub?: StringKey;
 }) {
   const { width } = useWindowDimensions();
-  const wide = width >= 900;
+  // A laptop window narrower than this still gets the stacked layout, but
+  // below ~760 the two columns would be too cramped to read.
+  const wide = width >= 760;
 
   if (wide) {
     return (
@@ -54,7 +56,7 @@ export function AuthShell({
         contentContainerClassName="flex-grow"
         keyboardShouldPersistTaps="handled"
       >
-        <Page className="w-full flex-grow">
+        <Page grow className="w-full flex-grow">
           <View className="gap-9 px-6 pb-12 pt-4">
             <View className="flex-row items-center justify-between">
               <Text className="font-num-b text-[20px] tracking-[-0.3px] text-background">
@@ -66,7 +68,7 @@ export function AuthShell({
           </View>
 
           {/* The card lifts over the dark panel, so the page has a front and a back. */}
-          <View className="-mt-5 flex-1 rounded-t-[32px] bg-background px-6 pb-12 pt-9">
+          <View className="-mt-5 min-h-[60vh] flex-grow rounded-t-[32px] bg-background px-6 pb-12 pt-9">
             <View className="w-full max-w-md gap-7 self-center">
               {children}
             </View>

@@ -167,7 +167,7 @@ export default function JoinQueue() {
         contentContainerClassName="flex-grow"
         keyboardShouldPersistTaps="handled"
       >
-        <Page className="w-full flex-grow">
+        <Page grow className="w-full flex-grow">
           {state === "loading" ? (
             <View className="flex-1 items-center justify-center bg-background py-24">
               <ActivityIndicator />
