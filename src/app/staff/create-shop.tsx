@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 
+import { AuthShell } from '@/components/auth-shell';
 import { Field, FormMessage } from '@/components/form';
-import { Screen } from '@/components/screen';
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import { prettyBaseUrl } from '@/lib/app-url';
@@ -10,6 +10,7 @@ import { useAuth } from '@/lib/auth';
 import { errorKey } from '@/lib/errors';
 import { StringKey, useI18n } from '@/lib/i18n';
 import { supabase } from '@/lib/supabase';
+import { cn } from '@/lib/utils';
 
 // "Sharma Hair Salon" → "sharma-hair-salon"
 function toSlug(text: string) {
@@ -50,7 +51,12 @@ export default function CreateShop() {
   }
 
   return (
-    <Screen title={t('createShop')} subtitle={t('createShopSubtitle')}>
+    <AuthShell headline="setupHeadline" sub="setupSub">
+      <View className="gap-2">
+        <Text className="font-ui-sb text-[28px] leading-[34px] tracking-[-0.6px]">{t('createShop')}</Text>
+        <Text className="text-[15px] leading-[22px] text-muted-foreground">{t('createShopSubtitle')}</Text>
+      </View>
+
       <View className="gap-4">
         <Field
           label={t('shopName')}
@@ -83,13 +89,23 @@ export default function CreateShop() {
 
       <FormMessage>{error ? t(error) : null}</FormMessage>
 
-      <Button size="xl" disabled={!canSubmit} onPress={submit}>
-        {busy ? <ActivityIndicator color="#ffffff" /> : <Text>{t('createShop')}</Text>}
-      </Button>
+      <View className="gap-3">
+        <Button
+          size="xl"
+          disabled={!canSubmit}
+          onPress={submit}
+          className={cn(!canSubmit && 'bg-secondary opacity-100')}>
+          {busy ? (
+            <ActivityIndicator color="#EFF1EE" />
+          ) : (
+            <Text className={cn(!canSubmit && 'text-muted-foreground')}>{t('createShop')}</Text>
+          )}
+        </Button>
 
-      <Button variant="ghost" onPress={signOut}>
-        <Text className="text-muted-foreground">{t('signOut')}</Text>
-      </Button>
-    </Screen>
+        <Button variant="ghost" onPress={signOut}>
+          <Text className="text-muted-foreground">{t('signOut')}</Text>
+        </Button>
+      </View>
+    </AuthShell>
   );
 }

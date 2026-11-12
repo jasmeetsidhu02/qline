@@ -20,7 +20,7 @@ export function Field({ label, hint, className, ...inputProps }: FieldProps) {
 }
 
 // Password input with an eye button to show / hide what was typed.
-export function PasswordField({ label, className, ...inputProps }: Omit<FieldProps, 'secureTextEntry'>) {
+export function PasswordField({ label, hint, className, ...inputProps }: Omit<FieldProps, 'secureTextEntry'>) {
   const [visible, setVisible] = useState(false);
   return (
     <View className="gap-2">
@@ -42,6 +42,13 @@ export function PasswordField({ label, className, ...inputProps }: Omit<FieldPro
           {visible ? <EyeOff size={20} color="#71717a" /> : <Eye size={20} color="#71717a" />}
         </Pressable>
       </View>
+      {hint ? (
+        typeof hint === 'string' ? (
+          <Text className="text-[13px] leading-[19px] text-muted-foreground">{hint}</Text>
+        ) : (
+          hint
+        )
+      ) : null}
     </View>
   );
 }
