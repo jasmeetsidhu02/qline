@@ -19,6 +19,13 @@ type Props = {
   onNoShow: (id: string) => void;
 };
 
+// The second line of a row: what they asked for, who they asked for, and
+// whether they were added at the counter. Empty when there is nothing to say.
+function detail(entry: QueueEntry, t: (k: 'walkIn' | 'forBarber', vars?: Record<string, string | number>) => string) {
+  return [entry.service, entry.barber ? t('forBarber', { name: entry.barber }) : null,
+    entry.source === 'walk_in' ? t('walkIn') : null].filter(Boolean).join('  ·  ');
+}
+
 // The line, as a list of plain rows. Tap a row to open its actions, so a
 // stray thumb can never drop someone from the queue.
 export function WaitingList({ entries, nowMs, busy, shopOpen, onCall, onNoShow }: Props) {
@@ -56,8 +63,10 @@ export function WaitingList({ entries, nowMs, busy, shopOpen, onCall, onNoShow }
                 <Text className="font-ui-md text-[17px]" numberOfLines={1}>
                   {entry.name}
                 </Text>
-                {entry.source === 'walk_in' ? (
-                  <Text className="text-[13px] text-muted-foreground">{t('walkIn')}</Text>
+                {detail(entry, t) ? (
+                  <Text className="text-[13px] text-muted-foreground" numberOfLines={1}>
+                    {detail(entry, t)}
+                  </Text>
                 ) : null}
               </View>
               <Text className="text-[14px] text-muted-foreground">

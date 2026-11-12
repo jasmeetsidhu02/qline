@@ -3,6 +3,7 @@ import { Clock, MapPinOff } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 
+import { ChipSelect } from '@/components/chip-select';
 import { Field, FormMessage } from '@/components/form';
 import { LanguagePicker } from '@/components/language-picker';
 import { StatusBlock } from '@/components/status-block';
@@ -16,16 +17,28 @@ import { loadTicket, saveTicket } from '@/lib/ticket-storage';
 import { ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-type ShopInfo = { id: string; name: string; is_open: boolean };
+type ShopInfo = { id: string; name: string; is_open: boolean; line_mode: 'shared' | 'pick_barber' };
+type PublicBarber = { id: string; name: string };
+type PublicService = { id: string; name_en: string; name_hi: string | null; name_pa: string | null; minutes: number };
+
+// The service's name in the reader's language, falling back to English.
+function serviceLabel(service: PublicService, lang: 'en' | 'hi' | 'pa') {
+  const byLang = lang === 'hi' ? service.name_hi : lang === 'pa' ? service.name_pa : service.name_en;
+  return byLang?.trim() || service.name_en;
+}
 
 // What the QR code opens: https://<domain>/s/<shop-slug>
 export default function JoinQueue() {
   const { slug } = useLocalSearchParams<{ slug: string }>();
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const [shop, setShop] = useState<ShopInfo | null>(null);
   const [state, setState] = useState<'loading' | 'ready' | 'notFound'>('loading');
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
+  const [barbers, setBarbers] = useState<PublicBarber[]>([]);
+  const [services, setServices] = useState<PublicService[]>([]);
+  const [serviceId, setServiceId] = useState<string | null>(null);
+  const [barberId, setBarberId] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -44,13 +57,25 @@ export default function JoinQueue() {
         }
       }
       // Public shop info. The shops table holds nothing private.
-      const { data } = await client.from('shops').select('id, name, is_open').eq('slug', slug).maybeSingle();
+      const { data } = await client.from('shops').select('id, name, is_open, line_mode').eq('slug', slug).maybeSingle();
       if (!alive) return;
-      if (!data) setState('notFound');
-      else {
-        setShop(data as ShopInfo);
-        setState('ready');
+      if (!data) {
+        setState('notFound');
+        return;
       }
+      setShop(data as ShopInfo);
+      setState('ready');
+
+      // What this shop offers. Customers are allowed to read both tables.
+      const [svc, brb] = await Promise.all([
+        client.from('services').select('id, name_en, name_hi, name_pa, minutes')
+          .eq('shop_id', data.id).eq('is_active', true).order('sort_order'),
+        client.from('barbers').select('id, name')
+          .eq('shop_id', data.id).eq('is_active', true).order('sort_order'),
+      ]);
+      if (!alive) return;
+      setServices((svc.data as PublicService[]) ?? []);
+      setBarbers((brb.data as PublicBarber[]) ?? []);
     })();
     return () => {
       alive = false;
@@ -65,7 +90,13 @@ export default function JoinQueue() {
     primeSound();
     setBusy(true);
     setError(null);
-    const { data, error } = await supabase.rpc('join_queue', { p_slug: slug, p_name: name.trim(), p_phone: phone });
+    const { data, error } = await supabase.rpc('join_queue', {
+      p_slug: slug,
+      p_name: name.trim(),
+      p_phone: phone,
+      p_service_id: serviceId,
+      p_barber_id: barberId,
+    });
     if (error) {
       const already = error.message?.match(/^ALREADY_IN_QUEUE:(\d+)/);
       setError(already ? t('alreadyInLine', { n: already[1] }) : t(errorKey(error) as StringKey));
@@ -104,7 +135,31 @@ export default function JoinQueue() {
               <StatusBlock icon={<Clock size={26} color="#5E6761" />} title={t('shopClosedNow')} hint={t('shopClosedNowHint')} />
             ) : (
               <>
-                <View className="gap-4">
+                <View className="gap-5">
+                  {services.length > 0 ? (
+                    <ChipSelect
+                      label={t('chooseService')}
+                      hint={t('optional')}
+                      value={serviceId}
+                      onChange={setServiceId}
+                      choices={services.map((s) => ({
+                        id: s.id,
+                        label: serviceLabel(s, lang),
+                        hint: `${s.minutes} ${t('min')}`,
+                      }))}
+                    />
+                  ) : null}
+
+                  {shop.line_mode === 'pick_barber' && barbers.length > 1 ? (
+                    <ChipSelect
+                      label={t('chooseBarber')}
+                      hint={t('optional')}
+                      value={barberId}
+                      onChange={setBarberId}
+                      choices={[{ id: null, label: t('anyBarber') }, ...barbers.map((b) => ({ id: b.id, label: b.name }))]}
+                    />
+                  ) : null}
+
                   <Field label={t('yourName')} value={name} onChangeText={setName} autoComplete="name" maxLength={40} />
                   <Field
                     label={t('phone')}

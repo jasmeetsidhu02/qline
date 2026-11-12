@@ -39,7 +39,7 @@ export function ServingCard({ entry, nowMs, compact, busy, onDone, onNoShow }: P
             {entry.name}
           </Text>
           <Text className="text-[14px] text-background/50" numberOfLines={1}>
-            {entry.phone ?? t('walkIn')}
+            {[entry.service, entry.barber, entry.phone ?? t('walkIn')].filter(Boolean).join('  ·  ')}
           </Text>
         </View>
       </View>

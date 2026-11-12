@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ActivityIndicator, Pressable, View } from 'react-native';
 
+import { ChipSelect } from '@/components/chip-select';
 import { FormMessage } from '@/components/form';
 import { CustomerLinkCard } from '@/components/queue/customer-link-card';
 import { NextButton } from '@/components/queue/next-button';
@@ -11,6 +12,7 @@ import { Screen, SectionHeading } from '@/components/screen';
 import { StaffMenu } from '@/components/staff-menu';
 import { Text } from '@/components/ui/text';
 import { useNow } from '@/hooks/use-now';
+import { useShopConfig } from '@/hooks/use-shop-config';
 import { useStaffQueue } from '@/hooks/use-staff-queue';
 import { useAuth } from '@/lib/auth';
 import { errorKey } from '@/lib/errors';
@@ -25,6 +27,9 @@ export default function Dashboard() {
   const { shop, refreshShop } = useAuth();
   const { queue, error: loadError, live, clockOffsetMs, callNext, finish, addWalkIn } = useStaffQueue(shop?.id);
   const nowMs = useNow() + clockOffsetMs;
+  const { barbers } = useShopConfig(shop?.id);
+  // Who is standing at the chair. Only asked when customers pick a barber.
+  const [callingAs, setCallingAs] = useState<string | null>(null);
 
   const [busy, setBusy] = useState(false); // a queue action is in flight
   const [toggling, setToggling] = useState(false);
@@ -55,6 +60,16 @@ export default function Dashboard() {
 
   const serving = queue?.serving ?? [];
   const waiting = queue?.waiting ?? [];
+  const activeBarbers = barbers.filter((b) => b.is_active);
+  const picksBarber = shop.line_mode === 'pick_barber' && activeBarbers.length > 1;
+
+  // A preview of who "Next" will call: the chosen barber's own customers
+  // first, then whoever is happy with anyone. The database decides for real.
+  const callingName = activeBarbers.find((b) => b.id === callingAs)?.name ?? null;
+  const nextUp = callingName
+    ? (waiting.find((e) => e.barber === callingName) ?? waiting.find((e) => !e.barber))
+    : waiting[0];
+
   const shownError = actionError ?? (loadError && !queue ? errorKey(loadError) : null);
 
   return (
@@ -101,11 +116,20 @@ export default function Dashboard() {
             )}
           </View>
 
+          {picksBarber ? (
+            <ChipSelect
+              label={t('whoIsCalling')}
+              value={callingAs}
+              onChange={setCallingAs}
+              choices={[{ id: null, label: t('anyBarber') }, ...activeBarbers.map((b) => ({ id: b.id, label: b.name }))]}
+            />
+          ) : null}
+
           <NextButton
-            nextEntry={waiting[0]}
+            nextEntry={nextUp}
             hasServing={serving.length > 0}
             busy={busy}
-            onPress={() => run(() => callNext())}
+            onPress={() => run(() => callNext(null, callingAs))}
           />
 
           <View className="gap-3">
@@ -127,7 +151,7 @@ export default function Dashboard() {
               nowMs={nowMs}
               busy={busy}
               shopOpen={shop.is_open}
-              onCall={(id) => run(() => callNext(id))}
+              onCall={(id) => run(() => callNext(id, callingAs))}
               onNoShow={(id) => run(() => finish(id, 'no_show'))}
             />
             <WalkInForm onAdd={addWalkIn} />

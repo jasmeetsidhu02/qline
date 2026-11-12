@@ -41,6 +41,7 @@ Run these once each, in order, in Supabase → SQL Editor:
 | `supabase/migrations/004_notifications.sql` | Push subscriptions and the "what should be sent now" function |
 | `supabase/migrations/005_hindi.sql` | Lets notifications be stored and sent in Hindi |
 | `supabase/migrations/006_linter_fixes.sql` | Pins `shop_today`'s search_path (see the note inside before "fixing" the other linter warning) |
+| `supabase/migrations/007_barbers_and_services.sql` | Barbers and services become real: `call_next` takes the calling barber, the staff board shows each customer's choice, waits use the chosen service's length |
 
 `supabase/test_in_sql_editor.sql` is a scratch file for trying the functions by hand.
 

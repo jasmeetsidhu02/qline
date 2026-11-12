@@ -11,6 +11,10 @@ export type QueueEntry = {
   source: 'qr' | 'walk_in';
   joined_at: string;
   called_at: string | null;
+  /** What they asked for, when the shop has services set up. */
+  service: string | null;
+  /** The barber they asked for, or the one serving them. */
+  barber: string | null;
 };
 
 export type StaffQueue = {
@@ -99,8 +103,11 @@ export function useStaffQueue(shopId: string | undefined) {
     [refetch, shopId]
   );
 
+  // barberId says which chair is free, so shops where customers pick a
+  // barber call that barber's own customers first.
   const callNext = useCallback(
-    (entryId?: string) => act('call_next', { p_shop_id: shopId, p_entry_id: entryId ?? null }),
+    (entryId?: string | null, barberId?: string | null) =>
+      act('call_next', { p_shop_id: shopId, p_entry_id: entryId ?? null, p_barber_id: barberId ?? null }),
     [act, shopId]
   );
   const finish = useCallback(
