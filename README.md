@@ -38,6 +38,7 @@ Run these once each, in order, in Supabase → SQL Editor:
 | `supabase/migrations/001_init.sql` | Tables, row-level security, the customer functions (join, status, leave) |
 | `supabase/migrations/002_staff_queue.sql` | Staff functions: the queue, Next, Done/No-show, walk-ins |
 | `supabase/migrations/003_better_eta.sql` | Waiting-time estimate that counts the person already in the chair |
+| `supabase/migrations/004_notifications.sql` | Push subscriptions and the "what should be sent now" function |
 
 `supabase/test_in_sql_editor.sql` is a scratch file for trying the functions by hand.
 
@@ -73,9 +74,46 @@ While developing, turn off **Authentication → Sign In / Providers → Email �
 
 The site is a single-page app: `vercel.json` rewrites every path to `index.html` so links like `/s/sharma-hair-salon` work.
 
+## Notifications
+
+A waiting customer can close the page and still be told when their turn is near. That needs one piece of server code, because a push message must be signed with a private key that can never ship inside the app.
+
+**One-time setup**
+
+1. Make a key pair:
+   ```bash
+   npx web-push generate-vapid-keys
+   ```
+2. Put the **public** key in `.env` as `EXPO_PUBLIC_VAPID_PUBLIC_KEY`. It is safe to ship, and it also goes in your Vercel environment variables.
+3. Give Supabase the **private** key, which never goes in `.env` or git:
+   ```bash
+   npx supabase login
+   npx supabase link --project-ref <your-project-ref>
+   npx supabase secrets set VAPID_PUBLIC_KEY=... VAPID_PRIVATE_KEY=... VAPID_SUBJECT=mailto:you@example.com
+   npx supabase functions deploy notify
+   ```
+
+**How it works**
+
+- The customer taps "Notify me", and their browser hands over a one-off address. `save_push_subscription` stores it against that ticket, with the language they were reading.
+- When the barber taps Next, Done or No-show, the app pings the `notify` function. The function asks the database what is due with `claim_due_notifications`, which marks and returns rows in one step, so nothing is ever sent twice.
+- Two moments are worth interrupting someone for: nobody is ahead of them any more, and the barber has called them. Both carry the same tag, so the second replaces the first on the lock screen.
+- A dead subscription (HTTP 410) is deleted, so we stop trying.
+- The subscription is tied to the queue entry and disappears with it. We never keep a way to message someone after their visit.
+
+**What to expect on each phone**
+
+| | |
+|---|---|
+| Android Chrome | Works in a normal tab. |
+| iPhone | Only after "Add to Home Screen". The page says so, in both languages. |
+| Page open | Vibration and a chime, no permission needed. |
+
+The service worker (`public/sw.js`) deliberately caches nothing: a cached app would show a stale queue position, which is worse than a slow load.
+
 ## Home screen
 
-`public/manifest.json` and `public/index.html` make the site installable, so the barber can add it to their home screen and have it open like an app. The service worker and notifications come next.
+`public/manifest.json` and `public/index.html` make the site installable, so the barber can add it to their home screen and have it open like an app.
 
 ## Milestones
 
@@ -87,6 +125,6 @@ The site is a single-page app: `vercel.json` rewrites every path to `index.html`
 | M3 | Live barber dashboard |
 | M4 | Customer join and live ticket |
 | M5 | Realistic wait times, Punjabi throughout, new design |
-| **M6** | **Notifications and offline support (next)** |
-| M7 | Barbers, services, line mode, printable QR poster |
+| M6 | Notifications: web push, in-page chime, home-screen install |
+| **M7** | **Barbers, services, line mode, printable QR poster (next)** |
 | M8 | Pilot hardening: undo, daily reset, stuck-customer nudge |

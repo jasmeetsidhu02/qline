@@ -11,6 +11,7 @@ import { Text } from '@/components/ui/text';
 import { errorKey } from '@/lib/errors';
 import { StringKey, useI18n } from '@/lib/i18n';
 import { supabase } from '@/lib/supabase';
+import { primeSound } from '@/lib/alert-sound';
 import { loadTicket, saveTicket } from '@/lib/ticket-storage';
 import { ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -60,6 +61,8 @@ export default function JoinQueue() {
 
   async function join() {
     if (!supabase) return setError(t('errNotConfigured'));
+    // A tap is the only moment a browser lets us open the audio channel.
+    primeSound();
     setBusy(true);
     setError(null);
     const { data, error } = await supabase.rpc('join_queue', { p_slug: slug, p_name: name.trim(), p_phone: phone });

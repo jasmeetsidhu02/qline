@@ -1,8 +1,9 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { CheckCircle2, LogOut, Ticket as TicketIcon, UserX } from 'lucide-react-native';
 import { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Pressable, Vibration, View } from 'react-native';
+import { ActivityIndicator, Pressable, View } from 'react-native';
 
+import { NotifyCard } from '@/components/notify-card';
 import { Numeral } from '@/components/numeral';
 import { Screen } from '@/components/screen';
 import { StatusBlock } from '@/components/status-block';
@@ -12,18 +13,25 @@ import { TicketStatus, useMyTicket } from '@/hooks/use-my-ticket';
 import { useNow } from '@/hooks/use-now';
 import { useI18n } from '@/lib/i18n';
 import { supabase } from '@/lib/supabase';
+import { alertNow } from '@/lib/alert-sound';
+import { resaveSubscription } from '@/lib/push';
 import { clearTicket, loadTicket } from '@/lib/ticket-storage';
 
 // What the customer watches while they wait.
 export default function TicketScreen() {
   const { slug } = useLocalSearchParams<{ slug: string }>();
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const [token, setToken] = useState<string | null | undefined>(undefined); // undefined = reading storage
   const { ticket, notFound, offline, updatedAt, refetch } = useMyTicket(token ?? null);
 
   useEffect(() => {
     if (slug) loadTicket(slug).then(setToken);
   }, [slug]);
+
+  // Already allowed notifications on an earlier visit? Point them at this ticket.
+  useEffect(() => {
+    if (token) resaveSubscription(token, lang);
+  }, [token, lang]);
 
   // Buzz when the turn arrives, or when nobody is left ahead.
   // (M6 adds notifications for when this page is not open.)
@@ -33,9 +41,7 @@ export default function TicketScreen() {
     const moment =
       ticket.status === 'serving' ? 'serving' : ticket.status === 'waiting' && ticket.people_ahead === 0 ? 'next' : 'other';
     if (lastMoment.current !== null && lastMoment.current !== moment && moment !== 'other') {
-      try {
-        Vibration.vibrate(moment === 'serving' ? [0, 500, 200, 500, 200, 500] : [0, 300]);
-      } catch {}
+      alertNow(moment === 'serving' ? 'turn' : 'next');
     }
     lastMoment.current = moment;
   }, [ticket]);
@@ -78,6 +84,8 @@ export default function TicketScreen() {
       {ticket.status === 'waiting' && !ticket.shop_is_open ? (
         <Text className="text-center text-[14px] leading-[20px] text-brass">{t('shopClosedWhileWaiting')}</Text>
       ) : null}
+
+      {ticket.status === 'waiting' && token ? <NotifyCard token={token} /> : null}
 
       {ticket.status === 'waiting' ? (
         <LeaveButton

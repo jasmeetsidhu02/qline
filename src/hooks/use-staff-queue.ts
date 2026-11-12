@@ -88,9 +88,15 @@ export function useStaffQueue(shopId: string | undefined) {
       if (!supabase) return { message: 'NOT_CONFIGURED' };
       const { error } = await supabase.rpc(fn, args);
       await refetch();
+      // Tell the sender to push whatever this action made due. Deliberately
+      // not awaited: the barber's screen must never wait on a notification,
+      // and anything missed is picked up by the next action.
+      if (!error && shopId) {
+        supabase.functions.invoke('notify', { body: { shop_id: shopId } }).catch(() => {});
+      }
       return error;
     },
-    [refetch]
+    [refetch, shopId]
   );
 
   const callNext = useCallback(
