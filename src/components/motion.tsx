@@ -1,8 +1,6 @@
-import { ReactNode } from "react";
-import Animated, {
-  FadeIn,
-  FadeInDown,
-  FadeOut,
+import { ReactNode, useEffect, useRef } from "react";
+import { Animated, Easing, Platform } from "react-native";
+import ReanimatedView, {
   LinearTransition,
   useReducedMotion,
 } from "react-native-reanimated";
@@ -11,17 +9,53 @@ import Animated, {
 // screen arriving — never as decoration. One entrance per screen, staggered,
 // and nothing that moves on its own afterwards.
 //
-// Everything here respects the phone's "reduce motion" setting: when it is
-// on, the same content appears with no movement at all.
+// Entrances are driven by React Native's own Animated rather than by
+// Reanimated's entering animations. Those start an element at opacity 0 and
+// depend on a library animation actually running; if it does not, on a
+// browser or a device where it misbehaves, the content never becomes
+// visible. Here the animation only ever ends in one place — fully visible —
+// and a timer forces that end state even if the animation never runs. An
+// invisible screen is a broken app; a screen that appears without sliding is
+// merely a plain one.
+//
+// Everything respects the system's "reduce motion" setting.
 
-const DURATION = 420;
+const DURATION = 380;
+/** However the animation goes, the content is visible by now. */
+const SAFETY_MS = 900;
+
+function useEntrance(delay: number, reduced: boolean) {
+  const progress = useRef(new Animated.Value(reduced ? 1 : 0)).current;
+
+  useEffect(() => {
+    if (reduced) {
+      progress.setValue(1);
+      return;
+    }
+    const animation = Animated.timing(progress, {
+      toValue: 1,
+      duration: DURATION,
+      delay,
+      easing: Easing.out(Easing.cubic),
+      // The JS driver updates plain styles, which works the same in a
+      // browser as on a phone.
+      useNativeDriver: Platform.OS !== "web",
+    });
+    animation.start();
+    const safety = setTimeout(() => progress.setValue(1), delay + SAFETY_MS);
+    return () => {
+      animation.stop();
+      clearTimeout(safety);
+    };
+  }, [progress, delay, reduced]);
+
+  return progress;
+}
 
 /**
  * A whole screen arriving. Expo Router's stack animations do not run on the
- * web build, where a route change swaps the two screens in one frame and
- * shows an empty one in between — which is what makes the app feel like a
- * set of documents rather than one piece of software. Fading each screen in
- * covers that gap on every platform.
+ * web build, where a route change unmounts one screen and mounts the next,
+ * showing an empty page in between. Fading each screen in covers that gap.
  */
 export function Page({
   children,
@@ -31,10 +65,11 @@ export function Page({
   className?: string;
 }) {
   const reduced = useReducedMotion();
+  const progress = useEntrance(0, reduced);
   return (
     <Animated.View
       className={className ?? "flex-1"}
-      entering={reduced ? FadeIn.duration(1) : FadeIn.duration(280)}
+      style={{ opacity: progress }}
     >
       {children}
     </Animated.View>
@@ -52,21 +87,28 @@ export function Appear({
   className?: string;
 }) {
   const reduced = useReducedMotion();
+  const progress = useEntrance(delay, reduced);
   return (
     <Animated.View
       className={className}
-      entering={
-        reduced
-          ? FadeIn.duration(1)
-          : FadeInDown.duration(DURATION).delay(delay).springify().damping(20)
-      }
+      style={{
+        opacity: progress,
+        transform: [
+          {
+            translateY: progress.interpolate({
+              inputRange: [0, 1],
+              outputRange: [10, 0],
+            }),
+          },
+        ],
+      }}
     >
       {children}
     </Animated.View>
   );
 }
 
-/** For something that appears and disappears in place, like an undo bar. */
+/** For something that appears in place, like the undo bar under the chair. */
 export function AppearInPlace({
   children,
   className,
@@ -75,13 +117,9 @@ export function AppearInPlace({
   className?: string;
 }) {
   const reduced = useReducedMotion();
+  const progress = useEntrance(0, reduced);
   return (
-    <Animated.View
-      className={className}
-      entering={reduced ? FadeIn.duration(1) : FadeIn.duration(260)}
-      exiting={reduced ? FadeOut.duration(1) : FadeOut.duration(180)}
-      layout={reduced ? undefined : LinearTransition.duration(260)}
-    >
+    <Animated.View className={className} style={{ opacity: progress }}>
       {children}
     </Animated.View>
   );
@@ -90,7 +128,8 @@ export function AppearInPlace({
 /**
  * A container whose children slide to their new positions when the list
  * changes, so a customer leaving the line reads as the line closing up
- * rather than the screen jumping.
+ * rather than the screen jumping. A layout animation can only move things
+ * that are already on screen, so it can never hide anything.
  */
 export function Settle({
   children,
@@ -101,16 +140,16 @@ export function Settle({
 }) {
   const reduced = useReducedMotion();
   return (
-    <Animated.View
+    <ReanimatedView.View
       className={className}
       layout={reduced ? undefined : LinearTransition.duration(280)}
     >
       {children}
-    </Animated.View>
+    </ReanimatedView.View>
   );
 }
 
-/** One row of a queue: arrives from above, leaves by fading, settles in place. */
+/** One row of a queue: settles into its new place when the line changes. */
 export function Row({
   children,
   className,
@@ -118,17 +157,5 @@ export function Row({
   children: ReactNode;
   className?: string;
 }) {
-  const reduced = useReducedMotion();
-  if (reduced)
-    return <Animated.View className={className}>{children}</Animated.View>;
-  return (
-    <Animated.View
-      className={className}
-      entering={FadeInDown.duration(320).springify().damping(20)}
-      exiting={FadeOut.duration(160)}
-      layout={LinearTransition.duration(280)}
-    >
-      {children}
-    </Animated.View>
-  );
+  return <Settle className={className}>{children}</Settle>;
 }

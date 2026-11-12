@@ -54,7 +54,7 @@ export function AuthShell({
         contentContainerClassName="flex-grow"
         keyboardShouldPersistTaps="handled"
       >
-        <Page>
+        <Page className="w-full flex-grow">
           <View className="gap-9 px-6 pb-12 pt-4">
             <View className="flex-row items-center justify-between">
               <Text className="font-num-b text-[20px] tracking-[-0.3px] text-background">
