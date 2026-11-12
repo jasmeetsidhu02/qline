@@ -39,6 +39,8 @@ Run these once each, in order, in Supabase → SQL Editor:
 | `supabase/migrations/002_staff_queue.sql` | Staff functions: the queue, Next, Done/No-show, walk-ins |
 | `supabase/migrations/003_better_eta.sql` | Waiting-time estimate that counts the person already in the chair |
 | `supabase/migrations/004_notifications.sql` | Push subscriptions and the "what should be sent now" function |
+| `supabase/migrations/005_hindi.sql` | Lets notifications be stored and sent in Hindi |
+| `supabase/migrations/006_linter_fixes.sql` | Pins `shop_today`'s search_path (see the note inside before "fixing" the other linter warning) |
 
 `supabase/test_in_sql_editor.sql` is a scratch file for trying the functions by hand.
 
