@@ -136,6 +136,8 @@ Test these deliberately — they are what will actually go wrong in Nangal.
 | Customer closes the tab | Close it, reopen the link | The ticket comes back — it is stored on the phone |
 | Customer leaves the shop | Tap "Leave the line" | They disappear from the barber's list at once |
 | No-show | Call someone who isn't there, tap No-show | They are gone and the next person can be called |
+| Wrong tap on Done | Tap Done, then **Undo** in the bar underneath | The customer goes back to the chair; a No-show from the line goes back to the line |
+| A day that never ended | Leave people waiting overnight, open the app tomorrow | The board is empty; yesterday's rows are closed off, and that customer's phone says the line has closed |
 | Shop closes with people waiting | Tap Close shop | Nobody new can join; the people already in line keep their place |
 | Same person joins twice | Join again with the same number | "You are already in the line, number N" |
 | Slow network | Chrome DevTools → Network → Slow 4G | Screens still load; taps don't double-fire |

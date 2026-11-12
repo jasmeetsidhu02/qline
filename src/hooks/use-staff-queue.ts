@@ -59,6 +59,10 @@ export function useStaffQueue(shopId: string | undefined) {
   useEffect(() => {
     if (!supabase || !shopId) return;
     const client = supabase;
+    // Yesterday never gets a proper ending in a real shop: the last customer
+    // is still "in the chair" when the barber locks up. Clear those off
+    // before showing today, so the board starts honest every morning.
+    client.rpc('close_old_days', { p_shop_id: shopId }).then(() => refetch());
     refetch();
 
     const channel = client
@@ -114,10 +118,12 @@ export function useStaffQueue(shopId: string | undefined) {
     (entryId: string, status: 'done' | 'no_show') => act('finish_entry', { p_entry_id: entryId, p_status: status }),
     [act]
   );
+  // Take back a wrong Done or No-show. The database allows it for 15 minutes.
+  const undo = useCallback((entryId: string) => act('undo_entry', { p_entry_id: entryId }), [act]);
   const addWalkIn = useCallback(
     (name: string, phone: string) => act('add_walk_in', { p_shop_id: shopId, p_name: name, p_phone: phone || null }),
     [act, shopId]
   );
 
-  return { queue, error, live, clockOffsetMs, refetch, callNext, finish, addWalkIn };
+  return { queue, error, live, clockOffsetMs, refetch, callNext, finish, undo, addWalkIn };
 }

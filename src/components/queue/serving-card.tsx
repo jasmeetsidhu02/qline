@@ -12,6 +12,8 @@ type Props = {
   entry: QueueEntry;
   nowMs: number;
   compact?: boolean; // true when several chairs are busy at once
+  /** Minutes after which this cut has clearly run long. */
+  nudgeAfterMin?: number;
   busy: boolean;
   onDone: () => void;
   onNoShow: () => void;
@@ -19,14 +21,15 @@ type Props = {
 
 // The customer in the chair. The one dark block on the screen, so a glance
 // from across the shop lands on it first.
-export function ServingCard({ entry, nowMs, compact, busy, onDone, onNoShow }: Props) {
+export function ServingCard({ entry, nowMs, compact, nudgeAfterMin = 40, busy, onDone, onNoShow }: Props) {
   const { t } = useI18n();
+  const mins = minutesSince(entry.called_at, nowMs);
   return (
     <View className="gap-5 rounded-[28px] bg-ink p-6">
       <View className="flex-row items-baseline justify-between">
         <Text className="font-ui-md text-[14px] text-brass-soft">{t('inChair')}</Text>
         <Text className="text-[14px] text-background/50">
-          {minutesSince(entry.called_at, nowMs)} {t('min')}
+          {mins} {t('min')}
         </Text>
       </View>
 
@@ -43,6 +46,10 @@ export function ServingCard({ entry, nowMs, compact, busy, onDone, onNoShow }: P
           </Text>
         </View>
       </View>
+
+      {mins >= nudgeAfterMin ? (
+        <Text className="-mt-2 text-[14px] leading-[19px] text-brass-soft">{t('stillInChair', { n: mins })}</Text>
+      ) : null}
 
       <View className="flex-row gap-3">
         <Button

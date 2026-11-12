@@ -1,5 +1,5 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import { CheckCircle2, LogOut, Ticket as TicketIcon, UserX } from 'lucide-react-native';
+import { CalendarX, CheckCircle2, LogOut, Ticket as TicketIcon, UserX } from 'lucide-react-native';
 import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, View } from 'react-native';
 
@@ -155,7 +155,9 @@ function Finished({ ticket, onJoinAgain }: { ticket: TicketStatus; onJoinAgain: 
     done: { icon: <CheckCircle2 size={26} color="#8F6424" />, title: t('statusDone'), hint: t('statusDoneHint') },
     no_show: { icon: <UserX size={26} color="#5E6761" />, title: t('statusNoShow'), hint: t('statusNoShowHint') },
     left: { icon: <LogOut size={26} color="#5E6761" />, title: t('statusLeft'), hint: t('statusLeftHint') },
-  }[ticket.status as 'done' | 'no_show' | 'left'];
+    // The shop's day ended while this ticket was still open.
+    expired: { icon: <CalendarX size={26} color="#5E6761" />, title: t('statusExpired'), hint: t('statusExpiredHint') },
+  }[ticket.status as 'done' | 'no_show' | 'left' | 'expired'];
 
   return (
     <StatusBlock icon={content.icon} title={content.title} hint={content.hint}>

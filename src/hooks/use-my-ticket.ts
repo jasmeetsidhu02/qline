@@ -5,7 +5,8 @@ import { supabase } from '@/lib/supabase';
 
 export type TicketStatus = {
   ticket_no: number;
-  status: 'waiting' | 'serving' | 'done' | 'no_show' | 'left';
+  /** 'expired' is a ticket from a day the shop has already closed. */
+  status: 'waiting' | 'serving' | 'done' | 'no_show' | 'left' | 'expired';
   people_ahead: number;
   est_wait_min: number;
   shop_name: string;

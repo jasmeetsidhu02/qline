@@ -1,11 +1,13 @@
 import { useState } from 'react';
-import { ActivityIndicator, Pressable, View } from 'react-native';
+import { ActivityIndicator, View } from 'react-native';
 
 import { ChipSelect } from '@/components/chip-select';
 import { FormMessage } from '@/components/form';
 import { CustomerLinkCard } from '@/components/queue/customer-link-card';
 import { NextButton } from '@/components/queue/next-button';
 import { EmptyChair, ServingCard } from '@/components/queue/serving-card';
+import { ShopSwitch } from '@/components/queue/shop-switch';
+import { UndoBar, type LastAction } from '@/components/queue/undo-bar';
 import { WaitingList } from '@/components/queue/waiting-list';
 import { WalkInForm } from '@/components/queue/walk-in-form';
 import { Screen, SectionHeading } from '@/components/screen';
@@ -18,14 +20,13 @@ import { useAuth } from '@/lib/auth';
 import { errorKey } from '@/lib/errors';
 import { StringKey, useI18n } from '@/lib/i18n';
 import { supabase } from '@/lib/supabase';
-import { cn } from '@/lib/utils';
 
 // The barber's screen. One dark block for who is in the chair, one brass
 // button to call the next person, and the line underneath.
 export default function Dashboard() {
   const { t } = useI18n();
   const { shop, refreshShop } = useAuth();
-  const { queue, error: loadError, live, clockOffsetMs, callNext, finish, addWalkIn } = useStaffQueue(shop?.id);
+  const { queue, error: loadError, live, clockOffsetMs, callNext, finish, undo, addWalkIn } = useStaffQueue(shop?.id);
   const nowMs = useNow() + clockOffsetMs;
   const { barbers } = useShopConfig(shop?.id);
   // Who is standing at the chair. Only asked when customers pick a barber.
@@ -34,17 +35,20 @@ export default function Dashboard() {
   const [busy, setBusy] = useState(false); // a queue action is in flight
   const [toggling, setToggling] = useState(false);
   const [actionError, setActionError] = useState<StringKey | null>(null);
+  // The last Done / No-show, so a wrong tap can be taken back.
+  const [lastAction, setLastAction] = useState<LastAction | null>(null);
 
   if (!shop) return null; // the staff layout redirects before this happens
 
   // Runs one queue action; blocks double-taps until it finishes.
   async function run(action: () => Promise<{ code?: string; message?: string } | null>) {
-    if (busy) return;
+    if (busy) return null;
     setBusy(true);
     setActionError(null);
     const err = await action();
     if (err) setActionError(errorKey(err));
     setBusy(false);
+    return err ?? null;
   }
 
   async function toggleOpen() {
@@ -60,6 +64,17 @@ export default function Dashboard() {
 
   const serving = queue?.serving ?? [];
   const waiting = queue?.waiting ?? [];
+  // Ends a customer and keeps the undo within reach.
+  async function endWith(entryId: string, ticketNo: number, kind: 'done' | 'no_show') {
+    const err = await run(() => finish(entryId, kind));
+    // Only offer the undo for something that really happened.
+    if (!err) setLastAction({ entryId, ticketNo, kind });
+  }
+
+  // A cut taking more than twice the usual time means the barber most
+  // likely forgot to tap Done, so the chair quietly says so.
+  const nudgeAfterMin = Math.max(30, shop.default_service_minutes * 2);
+
   const activeBarbers = barbers.filter((b) => b.is_active);
   const picksBarber = shop.line_mode === 'pick_barber' && activeBarbers.length > 1;
 
@@ -74,23 +89,8 @@ export default function Dashboard() {
 
   return (
     <Screen title={shop.name} action={<StaffMenu />}>
-      {/* Open or closed, and the switch for it */}
-      <Pressable
-        role="button"
-        accessibilityLabel={t(shop.is_open ? 'closeShop' : 'openShop')}
-        onPress={toggleOpen}
-        disabled={toggling}
-        className="-mt-3 flex-row items-center gap-3 active:opacity-60">
-        <View className={cn('h-2 w-2 rounded-full', shop.is_open ? 'bg-brass' : 'bg-muted-foreground/40')} />
-        <Text className="font-ui-md text-[15px]">{t(shop.is_open ? 'shopOpen' : 'shopClosed')}</Text>
-        {toggling ? (
-          <ActivityIndicator size="small" />
-        ) : (
-          <Text className="text-[15px] text-muted-foreground underline">
-            {t(shop.is_open ? 'closeShop' : 'openShop')}
-          </Text>
-        )}
-      </Pressable>
+      {/* Open or closed: the control that decides whether anyone can join */}
+      <ShopSwitch open={shop.is_open} busy={toggling} onToggle={toggleOpen} />
 
       <FormMessage>{shownError ? t(shownError) : null}</FormMessage>
 
@@ -109,19 +109,35 @@ export default function Dashboard() {
                   nowMs={nowMs}
                   compact={serving.length > 1}
                   busy={busy}
-                  onDone={() => run(() => finish(entry.id, 'done'))}
-                  onNoShow={() => run(() => finish(entry.id, 'no_show'))}
+                  nudgeAfterMin={nudgeAfterMin}
+                  onDone={() => endWith(entry.id, entry.ticket_no, 'done')}
+                  onNoShow={() => endWith(entry.id, entry.ticket_no, 'no_show')}
                 />
               ))
             )}
           </View>
 
           {picksBarber ? (
-            <ChipSelect
-              label={t('whoIsCalling')}
-              value={callingAs}
-              onChange={setCallingAs}
-              choices={[{ id: null, label: t('anyBarber') }, ...activeBarbers.map((b) => ({ id: b.id, label: b.name }))]}
+            <View className="gap-3 rounded-[22px] bg-card px-5 py-4">
+              <ChipSelect
+                big
+                label={t('whoIsCalling')}
+                value={callingAs}
+                onChange={setCallingAs}
+                choices={[{ id: null, label: t('anyBarber') }, ...activeBarbers.map((b) => ({ id: b.id, label: b.name }))]}
+              />
+            </View>
+          ) : null}
+
+          {lastAction ? (
+            <UndoBar
+              action={lastAction}
+              busy={busy}
+              onUndo={async () => {
+                const err = await undo(lastAction.entryId);
+                if (err) setActionError(errorKey(err));
+                setLastAction(null);
+              }}
             />
           ) : null}
 
@@ -152,7 +168,7 @@ export default function Dashboard() {
               busy={busy}
               shopOpen={shop.is_open}
               onCall={(id) => run(() => callNext(id, callingAs))}
-              onNoShow={(id) => run(() => finish(id, 'no_show'))}
+              onNoShow={(id, ticketNo) => endWith(id, ticketNo, 'no_show')}
             />
             <WalkInForm onAdd={addWalkIn} />
           </View>

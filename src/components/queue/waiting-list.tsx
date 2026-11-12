@@ -16,7 +16,7 @@ type Props = {
   busy: boolean;
   shopOpen: boolean;
   onCall: (id: string) => void;
-  onNoShow: (id: string) => void;
+  onNoShow: (id: string, ticketNo: number) => void;
 };
 
 // The second line of a row: what they asked for, who they asked for, and
@@ -96,7 +96,7 @@ export function WaitingList({ entries, nowMs, busy, shopOpen, onCall, onNoShow }
                   disabled={busy}
                   onPress={() => {
                     setOpenId(null);
-                    onNoShow(entry.id);
+                    onNoShow(entry.id, entry.ticket_no);
                   }}>
                   <Text className="text-destructive">{t('noShow')}</Text>
                 </Button>
