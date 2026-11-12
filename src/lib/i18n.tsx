@@ -1,7 +1,14 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
+import { createContext, ReactNode, useCallback, useContext, useEffect, useState } from 'react';
 
-export type Lang = 'pa' | 'en';
+export type Lang = 'en' | 'hi' | 'pa';
+
+/** Shown in the language picker, in each language's own script. */
+export const LANGUAGES: { code: Lang; label: string; short: string }[] = [
+  { code: 'en', label: 'English', short: 'EN' },
+  { code: 'hi', label: 'हिंदी', short: 'हि' },
+  { code: 'pa', label: 'ਪੰਜਾਬੀ', short: 'ਪੰ' },
+];
 
 const strings = {
   en: {
@@ -26,7 +33,6 @@ const strings = {
     settings: 'Settings',
     nowServing: 'Now serving',
     comingSoon: 'Coming in a later milestone',
-    switchLang: 'ਪੰਜਾਬੀ',
     email: 'Email',
     password: 'Password',
     signIn: 'Sign in',
@@ -86,7 +92,6 @@ const strings = {
     live: 'Live',
     reconnecting: 'Reconnecting…',
     customerName: 'Customer name',
-    // M4 customer side
     welcomeTo: 'Welcome to',
     joinSubtitle: 'Join the line from your phone. We will show your turn live.',
     joinHint: 'Your number is only used to tell you when your turn is near.',
@@ -132,7 +137,6 @@ const strings = {
     waitingCount: '{n} in line',
     todaySummary: '{done} done today, {noShow} no-shows',
     addSomeone: 'Add someone',
-    // Landing page
     demoAlt: 'A customer phone showing the line move, then their turn',
     demoShopName: 'Sharma Hair Salon',
     demoNow: 'Go to the chair',
@@ -151,7 +155,6 @@ const strings = {
     pricingLine: 'Free while you are trying it out.',
     closingTitle: 'Two minutes to set up',
     closingBody: 'Make an account, name your shop, and print the code. That is the whole setup.',
-    // Notifications
     notifyHeading: 'Get a message when your turn is near',
     notifyBody: 'You can close this page. We will send a message to this phone.',
     notifyEnable: 'Notify me',
@@ -173,6 +176,196 @@ const strings = {
     customerQr: 'Your shop QR code',
     customerQrHint: 'Customers scan this with their phone camera to join the line. Tap it to open the page yourself.',
     qrLocalhostWarning: 'This dashboard is open on "localhost", which other phones cannot reach. Open it using your computer\'s Wi-Fi address instead (for example http://192.168.1.5:8081), or use Expo Go.',
+    language: 'Language',
+    menu: 'Menu',
+    signOutConfirm: 'Sign out?',
+    signOutConfirmBody: 'You will need your email and password to get back in.',
+    shopSection: 'Shop',
+    accountSection: 'Account',
+    appearanceSection: 'App',
+    settingsBarbers: 'Barbers',
+    settingsServices: 'Services and times',
+    settingsLine: 'How the line works',
+    settingsPoster: 'Printable QR poster',
+    signedInAs: 'Signed in as {email}',
+  },
+  hi: {
+    appName: 'QLine',
+    tagline: 'इंतज़ार छोड़िए। अपने फ़ोन से लाइन में लगिए।',
+    staffLogin: 'स्टाफ़ लॉगिन',
+    joinQueue: 'लाइन में लगें',
+    yourName: 'आपका नाम',
+    phone: 'फ़ोन नंबर',
+    join: 'लगें',
+    yourTicket: 'आपका नंबर',
+    peopleAhead: 'आपसे आगे',
+    estWait: 'अनुमानित इंतज़ार',
+    leaveQueue: 'लाइन छोड़ें',
+    dashboard: 'डैशबोर्ड',
+    next: 'अगला',
+    done: 'हो गया',
+    noShow: 'नहीं आया',
+    addWalkIn: 'ग्राहक जोड़ें',
+    openShop: 'दुकान खोलें',
+    closeShop: 'दुकान बंद करें',
+    settings: 'सेटिंग्स',
+    nowServing: 'अभी बारी',
+    comingSoon: 'आगे के चरण में आएगा',
+    email: 'ईमेल',
+    password: 'पासवर्ड',
+    signIn: 'लॉगिन करें',
+    signUp: 'खाता बनाएँ',
+    noAccount: 'नए हैं? खाता बनाएँ',
+    haveAccount: 'पहले से खाता है? लॉगिन करें',
+    signInSubtitle: 'दुकान मालिकों और स्टाफ़ के लिए',
+    signUpSubtitle: '2 मिनट में अपनी दुकान के लिए QLine शुरू करें',
+    signOut: 'लॉगआउट',
+    checkEmail: 'खाता पक्का करने के लिए अपनी ईमेल देखें, फिर लॉगिन करें।',
+    createShop: 'अपनी दुकान बनाएँ',
+    createShopSubtitle: 'QR कोड स्कैन करने वाले ग्राहक यही नाम देखेंगे।',
+    shopName: 'दुकान का नाम',
+    shopLink: 'दुकान का लिंक',
+    shopLinkHint: 'सिर्फ़ छोटे अंग्रेज़ी अक्षर, अंक और डैश (-)।',
+    loading: 'लोड हो रहा है…',
+    shopOpen: 'खुली',
+    shopClosed: 'बंद',
+    customersCanJoin: 'ग्राहक लाइन में लग सकते हैं',
+    customersCannotJoin: 'अभी ग्राहक लाइन में नहीं लग सकते',
+    errGeneric: 'कुछ गड़बड़ हो गई। दोबारा कोशिश करें।',
+    errNetwork: 'इंटरनेट नहीं है। दोबारा कोशिश करें।',
+    errNotConfigured: 'ऐप डेटाबेस से जुड़ा नहीं है (.env नहीं है)।',
+    errInvalidLogin: 'ईमेल या पासवर्ड ग़लत है।',
+    errEmailTaken: 'इस ईमेल से खाता पहले से है। लॉगिन करें।',
+    errWeakPassword: 'पासवर्ड कम से कम 6 अक्षरों का हो।',
+    errInvalidEmail: 'सही ईमेल लिखें।',
+    errEmailNotConfirmed: 'पहले अपनी ईमेल पक्की करें (इनबॉक्स देखें)।',
+    errTooMany: 'बहुत बार कोशिश हुई। एक मिनट रुककर कोशिश करें।',
+    errSlugTaken: 'यह लिंक पहले से लिया हुआ है। कोई और लिखें।',
+    errInvalidSlug: 'लिंक 3–40 छोटे अक्षर, अंक या डैश का हो।',
+    errInvalidName: 'नाम लिखें।',
+    errInvalidPhone: 'फ़ोन नंबर 10 अंकों का हो।',
+    errAlreadyInQueue: 'यह फ़ोन नंबर पहले से लाइन में है।',
+    errNotAllowed: 'आपको इस दुकान की अनुमति नहीं है।',
+    errEntryGone: 'यह ग्राहक अब इंतज़ार में नहीं है।',
+    chairFree: 'कुर्सी ख़ाली है',
+    chairFreeHint: 'पहले ग्राहक को बुलाने के लिए "अगला" दबाएँ।',
+    inChair: 'कुर्सी पर',
+    waited: 'इंतज़ार',
+    min: 'मिनट',
+    nextUp: 'अगली बारी',
+    noOneWaiting: 'कोई इंतज़ार में नहीं',
+    finishCurrent: 'मौजूदा ग्राहक पूरा करें',
+    waitingList: 'इंतज़ार में',
+    doneToday: 'आज हो गए',
+    noShows: 'नहीं आए',
+    callNow: 'अभी बुलाएँ',
+    phoneCall: 'फ़ोन',
+    walkIn: 'सीधा आया',
+    addToQueue: 'लाइन में जोड़ें',
+    cancel: 'रद्द करें',
+    phoneOptional: 'फ़ोन नंबर (ज़रूरी नहीं)',
+    emptyQueue: 'लाइन में कोई नहीं',
+    emptyQueueHint: 'QR कोड स्कैन करने वाले ग्राहक यहाँ दिखेंगे।',
+    closedHint: 'ग्राहकों को लाइन में लगने देने के लिए दुकान खोलें।',
+    live: 'लाइव',
+    reconnecting: 'दोबारा जुड़ रहा है…',
+    customerName: 'ग्राहक का नाम',
+    welcomeTo: 'आपका स्वागत है',
+    joinSubtitle: 'अपने फ़ोन से लाइन में लगिए। हम आपकी बारी लाइव दिखाएँगे।',
+    joinHint: 'आपका नंबर सिर्फ़ बारी नज़दीक आने पर बताने के लिए इस्तेमाल होता है।',
+    shopNotFound: 'दुकान नहीं मिली',
+    shopNotFoundHint: 'दुकान में लगा QR कोड दोबारा स्कैन करें।',
+    shopClosedNow: 'दुकान अभी ग्राहक नहीं ले रही',
+    shopClosedNowHint: 'काउंटर पर पूछें, या बाद में देखें।',
+    alreadyInLine: 'यह फ़ोन नंबर पहले से लाइन में #{n} पर है।',
+    youAreNext: 'अगली बारी आपकी!',
+    youAreNextHint: 'दुकान के पास ही रहें।',
+    yourTurn: 'आपकी बारी आ गई!',
+    yourTurnHint: 'अभी कुर्सी पर आएँ।',
+    aheadOne: 'आपसे आगे 1 व्यक्ति',
+    aheadLabelOne: 'व्यक्ति आपसे आगे',
+    aheadLabelMany: 'लोग आपसे आगे',
+    yourNumber: 'आपका नंबर',
+    yourNumberIs: 'आपका नंबर {n} है',
+    seeCustomerView: 'ग्राहक वाला पेज देखें',
+    aheadMany: 'आपसे आगे {n} लोग',
+    aboutMin: '~{n} मिनट',
+    lessThanMin: '< 1 मिनट',
+    nowServingNo: 'अभी बारी',
+    nobodyYet: '—',
+    keepOpen: 'यह पेज अपने आप अपडेट होता है।',
+    updatedAgo: '{n} सेकंड पहले अपडेट',
+    offline: 'इंटरनेट नहीं। आख़िरी जानकारी दिखा रहे हैं।',
+    leaveConfirm: 'लाइन छोड़नी है? आपकी जगह चली जाएगी।',
+    yesLeave: 'हाँ, छोड़ें',
+    stay: 'लाइन में रहें',
+    statusDone: 'आने के लिए धन्यवाद!',
+    statusDoneHint: 'फिर मिलेंगे।',
+    statusNoShow: 'आपकी बारी निकल गई',
+    statusNoShowHint: 'आपका नंबर बुलाया गया पर आप नहीं थे। दोबारा लग सकते हैं।',
+    statusLeft: 'आपने लाइन छोड़ दी',
+    statusLeftHint: 'दुकान खुली हो तो कभी भी दोबारा लग सकते हैं।',
+    joinAgain: 'दोबारा लगें',
+    ticketNotFound: 'इस फ़ोन पर कोई नंबर नहीं',
+    ticketNotFoundHint: 'नंबर लेने के लिए लाइन में लगें।',
+    shopClosedWhileWaiting: 'दुकान ने नए ग्राहक लेने बंद किए हैं। आप अब भी लाइन में हैं।',
+    errShopClosed: 'दुकान अभी बंद है।',
+    errShopNotFound: 'दुकान नहीं मिली। QR कोड दोबारा स्कैन करें।',
+    errQueueFull: 'लाइन अभी भरी हुई है। काउंटर पर पूछें।',
+    waitingCount: 'लाइन में {n}',
+    todaySummary: 'आज {done} हो गए, {noShow} नहीं आए',
+    addSomeone: 'ग्राहक जोड़ें',
+    demoAlt: 'ग्राहक का फ़ोन जिसमें लाइन आगे बढ़ती दिखती है',
+    demoShopName: 'शर्मा हेयर सैलून',
+    demoNow: 'कुर्सी पर आएँ',
+    heroTitle: 'आपकी लाइन, हर किसी के फ़ोन पर।',
+    heroSub: 'ग्राहक दरवाज़े पर लगा कोड स्कैन करते हैं, लाइन खिसकती देखते हैं, और अपनी बारी पर आ जाते हैं। आप सिर्फ़ एक बटन दबाते हैं।',
+    ctaStart: 'अपनी दुकान शुरू करें',
+    ctaSignIn: 'लॉगिन करें',
+    forShops: 'नाइयों और सैलून के लिए',
+    howItWorks: 'यह कैसे काम करता है',
+    step1Title: 'शीशे पर कोड लगाएँ',
+    step1Body: 'ग्राहक फ़ोन के कैमरे से स्कैन करते हैं। कोई ऐप डाउनलोड करने की ज़रूरत नहीं।',
+    step2Title: 'वे लाइन खिसकती देखते हैं',
+    step2Body: 'फ़ोन पर दिखता है कि आगे कितने लोग हैं और कितना समय लगेगा। वे बाहर इंतज़ार कर सकते हैं।',
+    step3Title: 'आप "अगला" दबाते हैं',
+    step3Body: 'अगले ग्राहक को बुलाया जाता है। आपकी स्क्रीन पर हमेशा दिखता है कि कुर्सी पर कौन है।',
+    pricingLine: 'आज़माने के लिए मुफ़्त।',
+    closingTitle: 'दो मिनट में शुरू',
+    closingBody: 'खाता बनाएँ, दुकान का नाम लिखें, और कोड छपवा लें। बस इतना ही।',
+    notifyHeading: 'बारी नज़दीक आने पर संदेश पाएँ',
+    notifyBody: 'आप यह पेज बंद कर सकते हैं। हम इस फ़ोन पर संदेश भेजेंगे।',
+    notifyEnable: 'संदेश भेजें',
+    notifyOn: 'बारी नज़दीक आने पर हम बता देंगे।',
+    notifyBlocked: 'इस साइट के लिए संदेश बंद हैं। ब्राउज़र सेटिंग्स में चालू करें।',
+    notifyIosHint: 'संदेश पाने के लिए पहले यह पेज Home Screen पर लगाएँ।',
+    notifyIosSteps: 'Share बटन दबाएँ, फिर "Add to Home Screen", फिर आइकन से QLine खोलें।',
+    notifyError: 'संदेश चालू नहीं हो पाए। आप यह पेज खुला रख सकते हैं।',
+    notifyKeepOpen: 'अपनी बारी देखने के लिए यह पेज खुला रखें।',
+    builtIn: 'नंगल, पंजाब में बना',
+    qrHeading: 'आपका QR कोड',
+    qrHint: 'ग्राहक इसे स्कैन करके लाइन में लगते हैं। इसे छपवाकर काउंटर पर लगाएँ, या WhatsApp पर भेजें।',
+    shareQr: 'भेजें',
+    copyLink: 'लिंक कॉपी करें',
+    linkCopied: 'लिंक कॉपी हो गया',
+    qrDownloaded: 'QR कोड डाउनलोड में सेव हो गया',
+    shareFailed: 'भेजने वाली शीट नहीं खुली',
+    shareMessage: 'लाइन में लगने के लिए इसे स्कैन करें',
+    customerQr: 'आपकी दुकान का QR कोड',
+    customerQrHint: 'ग्राहक फ़ोन के कैमरे से इसे स्कैन करके लाइन में लगते हैं। ख़ुद खोलने के लिए इसे दबाएँ।',
+    qrLocalhostWarning: 'यह डैशबोर्ड "localhost" पर खुला है, जिसे दूसरे फ़ोन नहीं खोल सकते। कंप्यूटर के Wi-Fi पते से खोलें (जैसे http://192.168.1.5:8081), या Expo Go इस्तेमाल करें।',
+    language: 'भाषा',
+    menu: 'मेन्यू',
+    signOutConfirm: 'लॉगआउट करें?',
+    signOutConfirmBody: 'वापस आने के लिए ईमेल और पासवर्ड चाहिए होगा।',
+    shopSection: 'दुकान',
+    accountSection: 'खाता',
+    appearanceSection: 'ऐप',
+    settingsBarbers: 'नाई',
+    settingsServices: 'सेवाएँ और समय',
+    settingsLine: 'लाइन कैसे चलती है',
+    settingsPoster: 'छपाई वाला QR पोस्टर',
+    signedInAs: '{email} से लॉगिन',
   },
   pa: {
     appName: 'QLine',
@@ -196,7 +389,6 @@ const strings = {
     settings: 'ਸੈਟਿੰਗਾਂ',
     nowServing: 'ਹੁਣ ਵਾਰੀ',
     comingSoon: 'ਅਗਲੇ ਪੜਾਅ ਵਿੱਚ ਆਵੇਗਾ',
-    switchLang: 'English',
     email: 'ਈਮੇਲ',
     password: 'ਪਾਸਵਰਡ',
     signIn: 'ਲੌਗਇਨ ਕਰੋ',
@@ -340,6 +532,18 @@ const strings = {
     customerQr: 'ਤੁਹਾਡੀ ਦੁਕਾਨ ਦਾ QR ਕੋਡ',
     customerQrHint: 'ਗਾਹਕ ਫ਼ੋਨ ਦੇ ਕੈਮਰੇ ਨਾਲ ਇਹ ਸਕੈਨ ਕਰਕੇ ਲਾਈਨ ਵਿੱਚ ਲੱਗਦੇ ਹਨ। ਆਪ ਖੋਲ੍ਹਣ ਲਈ ਇਸ ਨੂੰ ਦਬਾਓ।',
     qrLocalhostWarning: 'ਇਹ ਡੈਸ਼ਬੋਰਡ "localhost" ਤੇ ਖੁੱਲ੍ਹਾ ਹੈ, ਜੋ ਹੋਰ ਫ਼ੋਨ ਨਹੀਂ ਖੋਲ੍ਹ ਸਕਦੇ। ਕੰਪਿਊਟਰ ਦੇ Wi-Fi ਪਤੇ ਨਾਲ ਖੋਲ੍ਹੋ (ਜਿਵੇਂ http://192.168.1.5:8081), ਜਾਂ Expo Go ਵਰਤੋ।',
+    language: 'ਭਾਸ਼ਾ',
+    menu: 'ਮੀਨੂ',
+    signOutConfirm: 'ਲੌਗਆਊਟ ਕਰਨਾ ਹੈ?',
+    signOutConfirmBody: 'ਵਾਪਸ ਆਉਣ ਲਈ ਈਮੇਲ ਅਤੇ ਪਾਸਵਰਡ ਚਾਹੀਦਾ ਹੋਵੇਗਾ।',
+    shopSection: 'ਦੁਕਾਨ',
+    accountSection: 'ਖਾਤਾ',
+    appearanceSection: 'ਐਪ',
+    settingsBarbers: 'ਨਾਈ',
+    settingsServices: 'ਸੇਵਾਵਾਂ ਅਤੇ ਸਮਾਂ',
+    settingsLine: 'ਲਾਈਨ ਕਿਵੇਂ ਚੱਲਦੀ ਹੈ',
+    settingsPoster: 'ਛਪਾਈ ਵਾਲਾ QR ਪੋਸਟਰ',
+    signedInAs: '{email} ਤੋਂ ਲੌਗਇਨ',
   },
 } as const;
 
@@ -349,37 +553,41 @@ type I18nValue = {
   lang: Lang;
   /** t('aheadMany', { n: 3 }) fills in {n}. */
   t: (key: StringKey, vars?: Record<string, string | number>) => string;
-  toggle: () => void;
+  setLang: (lang: Lang) => void;
 };
 
 const I18nContext = createContext<I18nValue | null>(null);
 const STORAGE_KEY = 'qline.lang';
 
+function isLang(value: string | null): value is Lang {
+  return value === 'en' || value === 'hi' || value === 'pa';
+}
+
 export function I18nProvider({ children }: { children: ReactNode }) {
-  // Punjabi first, as agreed for the pilot.
-  const [lang, setLang] = useState<Lang>('pa');
+  // English by default; the shop picks its own in Settings and customers can
+  // switch on any screen.
+  const [lang, setLangState] = useState<Lang>('en');
 
   useEffect(() => {
     AsyncStorage.getItem(STORAGE_KEY)
       .then((saved) => {
-        if (saved === 'pa' || saved === 'en') setLang(saved);
+        if (isLang(saved)) setLangState(saved);
       })
       .catch(() => {});
   }, []);
 
-  const toggle = () => {
-    const nextLang: Lang = lang === 'pa' ? 'en' : 'pa';
-    setLang(nextLang);
-    AsyncStorage.setItem(STORAGE_KEY, nextLang).catch(() => {});
-  };
+  const setLang = useCallback((next: Lang) => {
+    setLangState(next);
+    AsyncStorage.setItem(STORAGE_KEY, next).catch(() => {});
+  }, []);
 
   const t = (key: StringKey, vars?: Record<string, string | number>) => {
-    let text: string = strings[lang][key];
+    let text: string = strings[lang][key] ?? strings.en[key];
     if (vars) for (const [k, v] of Object.entries(vars)) text = text.replace(`{${k}}`, String(v));
     return text;
   };
 
-  return <I18nContext.Provider value={{ lang, t, toggle }}>{children}</I18nContext.Provider>;
+  return <I18nContext.Provider value={{ lang, t, setLang }}>{children}</I18nContext.Provider>;
 }
 
 export function useI18n() {

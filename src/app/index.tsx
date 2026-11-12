@@ -3,7 +3,7 @@ import { Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { PhoneDemo } from '@/components/landing/phone-demo';
-import { LanguageSwitch } from '@/components/screen';
+import { LanguagePicker } from '@/components/language-picker';
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import { useI18n } from '@/lib/i18n';
@@ -28,7 +28,7 @@ export default function Home() {
                 className="px-2 py-1 active:opacity-60">
                 <Text className="text-[14px] text-background/70">{t('ctaSignIn')}</Text>
               </Pressable>
-              <LanguageSwitch onDark />
+              <LanguagePicker onDark />
             </View>
           </View>
 

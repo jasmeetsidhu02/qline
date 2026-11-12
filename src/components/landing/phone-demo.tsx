@@ -4,7 +4,7 @@ import { Animated, Easing, View } from 'react-native';
 import { Numeral } from '@/components/numeral';
 import { Text } from '@/components/ui/text';
 import { useReducedMotion } from '@/hooks/use-reduced-motion';
-import { useI18n } from '@/lib/i18n';
+import { LANGUAGES, useI18n } from '@/lib/i18n';
 
 // The customer's screen, playing out a whole visit: three people ahead,
 // then two, then one, then their turn. It is the product demo and the only
@@ -13,7 +13,7 @@ const STEPS = [{ ahead: 3 }, { ahead: 2 }, { ahead: 1 }, { ahead: 0 }, { serving
 const HOLD_MS = 2000;
 
 export function PhoneDemo() {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const reducedMotion = useReducedMotion();
   // Someone who asked for less motion gets the best single frame instead.
   const [index, setIndex] = useState(reducedMotion ? 3 : 0);
@@ -49,7 +49,9 @@ export function PhoneDemo() {
       <View className="mb-4 flex-row items-center justify-between">
         <Text className="font-ui-sb text-[15px]">{t('demoShopName')}</Text>
         <View className="rounded-full border border-border px-2 py-0.5">
-          <Text className="text-[10px] text-muted-foreground">English</Text>
+          <Text className="text-[10px] text-muted-foreground">
+            {LANGUAGES.find((l) => l.code === lang)?.short}
+          </Text>
         </View>
       </View>
 

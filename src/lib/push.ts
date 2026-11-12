@@ -1,5 +1,6 @@
 import { Platform } from 'react-native';
 
+import type { Lang } from '@/lib/i18n';
 import { supabase } from '@/lib/supabase';
 
 // Web push, for telling a customer their turn is near when the page is shut.
@@ -56,7 +57,7 @@ async function registration() {
  * Asks permission, subscribes, and stores the address against this ticket.
  * Must be called from a tap: browsers reject a permission prompt otherwise.
  */
-export async function enablePush(token: string, lang: 'pa' | 'en'): Promise<PushState> {
+export async function enablePush(token: string, lang: Lang): Promise<PushState> {
   if (pushState() === 'unsupported' || pushState() === 'needs-install') return pushState();
   if (!supabase) return 'unsupported';
 
@@ -72,7 +73,7 @@ export async function enablePush(token: string, lang: 'pa' | 'en'): Promise<Push
 
 // Subscribing needs permission, which we already have by this point, so it
 // never shows a prompt. Reuses an existing subscription when there is one.
-async function subscribeAndSave(reg: ServiceWorkerRegistration, token: string, lang: 'pa' | 'en') {
+async function subscribeAndSave(reg: ServiceWorkerRegistration, token: string, lang: Lang) {
   const sub =
     (await reg.pushManager.getSubscription()) ??
     (await reg.pushManager.subscribe({
@@ -96,7 +97,7 @@ async function subscribeAndSave(reg: ServiceWorkerRegistration, token: string, l
  * notifications before, there is no prompt to show — but the new ticket still
  * needs its own subscription saved, otherwise nothing would ever reach them.
  */
-export async function resaveSubscription(token: string, lang: 'pa' | 'en') {
+export async function resaveSubscription(token: string, lang: Lang) {
   if (pushState() !== 'on' || !supabase) return;
   try {
     const reg = await registration();

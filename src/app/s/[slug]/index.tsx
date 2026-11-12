@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 
 import { Field, FormMessage } from '@/components/form';
-import { LanguageSwitch } from '@/components/screen';
+import { LanguagePicker } from '@/components/language-picker';
 import { StatusBlock } from '@/components/status-block';
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
@@ -84,7 +84,7 @@ export default function JoinQueue() {
         keyboardShouldPersistTaps="handled">
         <View className="flex-row items-start justify-between gap-4">
           <Text className="font-num-b text-[19px] tracking-[-0.3px] text-muted-foreground">QLine</Text>
-          <LanguageSwitch />
+          <LanguagePicker />
         </View>
 
         {state === 'loading' ? (

@@ -1,15 +1,21 @@
 import { ReactNode } from 'react';
-import { Pressable, ScrollView, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { LanguagePicker } from '@/components/language-picker';
 import { Text } from '@/components/ui/text';
 import { useI18n } from '@/lib/i18n';
-import { cn } from '@/lib/utils';
 
-type ScreenProps = { title?: string; subtitle?: string; children: ReactNode };
+type ScreenProps = {
+  title?: string;
+  subtitle?: string;
+  /** Extra control for the header, e.g. the staff menu button. */
+  action?: ReactNode;
+  children: ReactNode;
+};
 
 // Page shell: safe area, one centred column, and the language switch.
-export function Screen({ title, subtitle, children }: ScreenProps) {
+export function Screen({ title, subtitle, action, children }: ScreenProps) {
   return (
     <SafeAreaView className="flex-1 bg-background">
       <ScrollView
@@ -20,29 +26,14 @@ export function Screen({ title, subtitle, children }: ScreenProps) {
             {title ? <Text className="font-ui-sb text-[26px] leading-[32px] tracking-[-0.5px]">{title}</Text> : null}
             {subtitle ? <Text className="text-[15px] text-muted-foreground">{subtitle}</Text> : null}
           </View>
-          <LanguageSwitch />
+          <View className="flex-row items-center gap-2">
+            <LanguagePicker />
+            {action}
+          </View>
         </View>
         {children}
       </ScrollView>
     </SafeAreaView>
-  );
-}
-
-export function LanguageSwitch({ onDark }: { onDark?: boolean }) {
-  const { t, toggle } = useI18n();
-  return (
-    <Pressable
-      onPress={toggle}
-      hitSlop={10}
-      accessibilityRole="button"
-      className={cn(
-        'rounded-full border px-3.5 py-1.5 active:opacity-70',
-        onDark ? 'border-ink-line' : 'border-border'
-      )}>
-      <Text className={cn('font-ui-md text-[13px]', onDark ? 'text-brass-soft' : 'text-muted-foreground')}>
-        {t('switchLang')}
-      </Text>
-    </Pressable>
   );
 }
 

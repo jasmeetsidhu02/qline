@@ -1,4 +1,3 @@
-import { router } from 'expo-router';
 import { useState } from 'react';
 import { ActivityIndicator, Pressable, View } from 'react-native';
 
@@ -9,6 +8,7 @@ import { EmptyChair, ServingCard } from '@/components/queue/serving-card';
 import { WaitingList } from '@/components/queue/waiting-list';
 import { WalkInForm } from '@/components/queue/walk-in-form';
 import { Screen, SectionHeading } from '@/components/screen';
+import { StaffMenu } from '@/components/staff-menu';
 import { Text } from '@/components/ui/text';
 import { useNow } from '@/hooks/use-now';
 import { useStaffQueue } from '@/hooks/use-staff-queue';
@@ -22,7 +22,7 @@ import { cn } from '@/lib/utils';
 // button to call the next person, and the line underneath.
 export default function Dashboard() {
   const { t } = useI18n();
-  const { shop, refreshShop, signOut } = useAuth();
+  const { shop, refreshShop } = useAuth();
   const { queue, error: loadError, live, clockOffsetMs, callNext, finish, addWalkIn } = useStaffQueue(shop?.id);
   const nowMs = useNow() + clockOffsetMs;
 
@@ -58,7 +58,7 @@ export default function Dashboard() {
   const shownError = actionError ?? (loadError && !queue ? errorKey(loadError) : null);
 
   return (
-    <Screen title={shop.name}>
+    <Screen title={shop.name} action={<StaffMenu />}>
       {/* Open or closed, and the switch for it */}
       <Pressable
         role="button"
@@ -141,18 +141,6 @@ export default function Dashboard() {
         </>
       )}
 
-      <View className="flex-row justify-center gap-6">
-        <FooterLink label={t('settings')} onPress={() => router.push('/staff/settings')} />
-        <FooterLink label={t('signOut')} onPress={signOut} />
-      </View>
     </Screen>
-  );
-}
-
-function FooterLink({ label, onPress }: { label: string; onPress: () => void }) {
-  return (
-    <Pressable role="button" onPress={onPress} hitSlop={10} className="py-2 active:opacity-60">
-      <Text className="text-[15px] text-muted-foreground underline">{label}</Text>
-    </Pressable>
   );
 }
