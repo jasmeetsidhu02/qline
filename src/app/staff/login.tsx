@@ -1,3 +1,4 @@
+import { useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 
@@ -14,7 +15,9 @@ import { supabase } from '@/lib/supabase';
 // the user on automatically (to create-shop or dashboard). No router.push needed.
 export default function StaffLogin() {
   const { t } = useI18n();
-  const [mode, setMode] = useState<'signIn' | 'signUp'>('signIn');
+  // The landing page sends new owners here with ?new=1
+  const { new: isNew } = useLocalSearchParams<{ new?: string }>();
+  const [mode, setMode] = useState<'signIn' | 'signUp'>(isNew ? 'signUp' : 'signIn');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
