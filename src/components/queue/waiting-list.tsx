@@ -2,6 +2,7 @@ import { Phone, Users } from 'lucide-react-native';
 import { useState } from 'react';
 import { Linking, Pressable, View } from 'react-native';
 
+import { Row as MotionRow } from '@/components/motion';
 import { Numeral } from '@/components/numeral';
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
@@ -51,7 +52,7 @@ export function WaitingList({ entries, nowMs, busy, shopOpen, onCall, onNoShow }
       {entries.map((entry, index) => {
         const open = openId === entry.id;
         return (
-          <View key={entry.id} className={cn(index > 0 && 'border-t border-border')}>
+          <MotionRow key={entry.id} className={cn(index > 0 && 'border-t border-border')}>
             <Pressable
               role="button"
               onPress={() => setOpenId(open ? null : entry.id)}
@@ -102,7 +103,7 @@ export function WaitingList({ entries, nowMs, busy, shopOpen, onCall, onNoShow }
                 </Button>
               </View>
             ) : null}
-          </View>
+          </MotionRow>
         );
       })}
     </View>

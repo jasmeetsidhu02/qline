@@ -25,7 +25,15 @@ export default function StaffLayout() {
   const hasShop = Boolean(shop);
 
   return (
-    <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: '#ffffff' } }}>
+    <Stack
+      screenOptions={{
+        headerShown: false,
+        contentStyle: { backgroundColor: '#EFF1EE' },
+        // Signing in and setting up are steps along one path, so they move
+        // sideways the way a phone does.
+        animation: 'slide_from_right',
+        animationDuration: 280,
+      }}>
       <Stack.Protected guard={!loggedIn} redirectTo={hasShop ? '/staff/dashboard' : '/staff/create-shop'}>
         <Stack.Screen name="login" />
       </Stack.Protected>

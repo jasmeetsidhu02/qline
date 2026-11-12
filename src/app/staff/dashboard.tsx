@@ -3,6 +3,7 @@ import { ActivityIndicator, View } from 'react-native';
 
 import { ChipSelect } from '@/components/chip-select';
 import { FormMessage } from '@/components/form';
+import { Appear, AppearInPlace, Settle } from '@/components/motion';
 import { CustomerLinkCard } from '@/components/queue/customer-link-card';
 import { NextButton } from '@/components/queue/next-button';
 import { EmptyChair, ServingCard } from '@/components/queue/serving-card';
@@ -98,7 +99,7 @@ export default function Dashboard() {
         <View className="items-center py-20">{loadError ? null : <ActivityIndicator />}</View>
       ) : (
         <>
-          <View className="gap-3">
+          <Settle className="gap-3">
             {serving.length === 0 ? (
               <EmptyChair />
             ) : (
@@ -115,7 +116,7 @@ export default function Dashboard() {
                 />
               ))
             )}
-          </View>
+          </Settle>
 
           {picksBarber ? (
             <View className="gap-3 rounded-[22px] bg-card px-5 py-4">
@@ -130,15 +131,17 @@ export default function Dashboard() {
           ) : null}
 
           {lastAction ? (
-            <UndoBar
-              action={lastAction}
-              busy={busy}
-              onUndo={async () => {
-                const err = await undo(lastAction.entryId);
-                if (err) setActionError(errorKey(err));
-                setLastAction(null);
-              }}
-            />
+            <AppearInPlace>
+              <UndoBar
+                action={lastAction}
+                busy={busy}
+                onUndo={async () => {
+                  const err = await undo(lastAction.entryId);
+                  if (err) setActionError(errorKey(err));
+                  setLastAction(null);
+                }}
+              />
+            </AppearInPlace>
           ) : null}
 
           <NextButton
@@ -173,7 +176,9 @@ export default function Dashboard() {
             <WalkInForm onAdd={addWalkIn} />
           </View>
 
-          <CustomerLinkCard slug={shop.slug} shopName={shop.name} />
+          <Appear delay={120}>
+            <CustomerLinkCard slug={shop.slug} shopName={shop.name} />
+          </Appear>
 
           <Text className="text-center text-[14px] text-muted-foreground">
             {t('todaySummary', { done: queue.done_today, noShow: queue.no_show_today })}

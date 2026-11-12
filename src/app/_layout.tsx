@@ -30,7 +30,16 @@ export default function RootLayout() {
           <StatusBar style="dark" />
           {/* Default type for every Text in the app. */}
           <TextClassContext.Provider value="font-ui text-foreground">
-            <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: '#EFF1EE' } }} />
+            <Stack
+              screenOptions={{
+                headerShown: false,
+                contentStyle: { backgroundColor: '#EFF1EE' },
+                // Moving between the three worlds (landing, staff, customer)
+                // is a change of place, not a step forward, so they cross-fade.
+                animation: 'fade',
+                animationDuration: 260,
+              }}
+            />
           </TextClassContext.Provider>
           <PortalHost />
         </AuthProvider>

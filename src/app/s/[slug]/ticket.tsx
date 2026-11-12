@@ -3,6 +3,7 @@ import { CalendarX, CheckCircle2, LogOut, Ticket as TicketIcon, UserX } from 'lu
 import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, View } from 'react-native';
 
+import { Appear, AppearInPlace } from '@/components/motion';
 import { NotifyCard } from '@/components/notify-card';
 import { Numeral } from '@/components/numeral';
 import { Screen } from '@/components/screen';
@@ -77,15 +78,31 @@ export default function TicketScreen() {
 
   return (
     <Screen title={ticket.shop_name}>
-      {ticket.status === 'serving' ? <YourTurn ticket={ticket} /> : null}
-      {ticket.status === 'waiting' ? <Waiting ticket={ticket} /> : null}
-      {!active ? <Finished ticket={ticket} onJoinAgain={joinAgain} /> : null}
+      {ticket.status === 'serving' ? (
+        <AppearInPlace>
+          <YourTurn ticket={ticket} />
+        </AppearInPlace>
+      ) : null}
+      {ticket.status === 'waiting' ? (
+        <AppearInPlace>
+          <Waiting ticket={ticket} />
+        </AppearInPlace>
+      ) : null}
+      {!active ? (
+        <AppearInPlace>
+          <Finished ticket={ticket} onJoinAgain={joinAgain} />
+        </AppearInPlace>
+      ) : null}
 
       {ticket.status === 'waiting' && !ticket.shop_is_open ? (
         <Text className="text-center text-[14px] leading-[20px] text-brass">{t('shopClosedWhileWaiting')}</Text>
       ) : null}
 
-      {ticket.status === 'waiting' && token ? <NotifyCard token={token} /> : null}
+      {ticket.status === 'waiting' && token ? (
+        <Appear delay={120}>
+          <NotifyCard token={token} />
+        </Appear>
+      ) : null}
 
       {ticket.status === 'waiting' ? (
         <LeaveButton
