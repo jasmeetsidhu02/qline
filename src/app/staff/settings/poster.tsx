@@ -10,16 +10,8 @@ import { customerUrl } from '@/lib/app-url';
 import { useAuth } from '@/lib/auth';
 import { useI18n } from '@/lib/i18n';
 
-// Every language at once: the poster goes on a wall, where one customer
-// reads Punjabi and the next reads Hindi.
-const SCAN_LINES = [
-  { text: 'ਲਾਈਨ ਵਿੱਚ ਲੱਗਣ ਲਈ ਸਕੈਨ ਕਰੋ', sub: 'ਆਪਣੀ ਵਾਰੀ ਫ਼ੋਨ ਤੇ ਦੇਖੋ' },
-  { text: 'लाइन में लगने के लिए स्कैन करें', sub: 'अपनी बारी फ़ोन पर देखें' },
-  { text: 'Scan to join the line', sub: 'See your turn on your phone' },
-];
-
 export default function Poster() {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const { shop } = useAuth();
   const qrRef = useRef<{ toDataURL?: (cb: (data: string) => void) => void } | null>(null);
   const [busy, setBusy] = useState(false);
@@ -41,7 +33,8 @@ export default function Poster() {
       const win = window.open('', '_blank', 'width=820,height=1000');
       setBusy(false);
       if (!win) return;
-      win.document.write(posterHtml(shop!.name, url, base64));
+      // The poster is printed in the language the shop is using.
+      win.document.write(posterHtml(shop!.name, url, base64, lang, t('posterScan'), t('posterScanSub')));
       win.document.close();
       win.focus();
       setTimeout(() => win.print(), 400);
@@ -56,13 +49,9 @@ export default function Poster() {
         <View className="rounded-2xl border border-border p-4">
           <QRCode value={url} size={190} color="#16211C" backgroundColor="#ffffff" ecl="M" />
         </View>
-        <View className="gap-3">
-          {SCAN_LINES.map((line) => (
-            <View key={line.text} className="items-center">
-              <Text className="text-center text-[16px] font-ui-sb text-ink">{line.text}</Text>
-              <Text className="text-center text-[13px] text-muted-foreground">{line.sub}</Text>
-            </View>
-          ))}
+        <View className="items-center">
+          <Text className="text-center font-ui-sb text-[16px] text-ink">{t('posterScan')}</Text>
+          <Text className="text-center text-[13px] text-muted-foreground">{t('posterScanSub')}</Text>
         </View>
         <Text className="text-center text-[12px] text-muted-foreground" selectable>
           {url}
@@ -102,14 +91,12 @@ export default function Poster() {
   );
 }
 
-function posterHtml(shopName: string, url: string, qrBase64: string) {
+function posterHtml(shopName: string, url: string, qrBase64: string, lang: string, scan: string, sub: string) {
   const escape = (s: string) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!);
-  const lines = SCAN_LINES.map(
-    (l) => `<div class="line"><div class="big">${escape(l.text)}</div><div class="small">${escape(l.sub)}</div></div>`
-  ).join('');
+  const lines = `<div class="line"><div class="big">${escape(scan)}</div><div class="small">${escape(sub)}</div></div>`;
 
   return `<!doctype html>
-<html lang="en"><head><meta charset="utf-8" />
+<html lang="${escape(lang)}"><head><meta charset="utf-8" />
 <title>${escape(shopName)} — QLine</title>
 <style>
   @page { size: A4; margin: 14mm; }
